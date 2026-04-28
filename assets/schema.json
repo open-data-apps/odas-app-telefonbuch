@@ -1,25 +1,16 @@
 {
-  "$schema": "https://frictionlessdata.io/schemas/table-schema.json",
   "fields": [
     {
       "name": "Name",
-      "type": "string",
-      "title": "Name",
-      "description": "Name der Person"
+      "type": "string"
     },
     {
       "name": "Position",
-      "type": "string",
-      "title": "Position",
-      "description": "Funktion oder Beruf der Person"
+      "type": "string"
     },
     {
       "name": "Telefonnummer",
-      "type": "string",
-      "title": "Telefonnummer",
-      "description": "Telefonnummer im Format Ortsvorwahl/Rufnummer"
+      "type": "string"
     }
-  ],
-  "primaryKey": "Name",
-  "missingValues": ["", "null"]
+  ]
 }
