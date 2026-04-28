@@ -1,0 +1,17 @@
+{
+  "apiVersion": "1",
+  "titel": "Telefonbuch der Ondics GmbH",
+  "seitentitel": "Telefonbuch",
+  "icon": "logo_ondics.png",
+  "brandingCSS": "",
+  "brandingCSSFile": "",
+  "beschreibung": "abc",
+  "kontakt": "Tel.: <a href='tel:+49711310093100'>0711-31009-3100</a><br>Fax: <a href='tel:+49711310093108'>0711-31009-3108</a><br>E-Mail: <a href='mailto:info@ondics.de'>info@ondics.de</a>",
+  "impressum": "Ondics GmbH<br>Wolfgang Clauss<br>Blumenstrasse 19<br><a href='https://www.ondics.de/' target='_blank'>https://www.ondics.de/</a>",
+  "datenschutz": "abc",
+  "urlODP": "<a href='https://offenedaten.esslingen.de' target='_blank'>https://offenedaten.esslingen.de</a>",
+  "urlDaten": "<a href='https://offenedaten.esslingen.de/Ondics_GmbH' target='_blank'>https://offenedaten.esslingen.de/Ondics_GmbH</a>",
+  "fusszeile": "(C) Copyright 2025 | Inhalt: Stadt Esslingen | App: Mueller GmbH | Provided by: Ondics GmbH",
+  "apiurl": "https://open-data-musterstadt.ckan.de/dataset/4b5752b1-1d68-4ae7-9be5-4a0f2f362092/resource/4f30dd36-bf63-4ab5-b2e5-b09fe0c55900/download/telefonbuch-musterstadt.csv",
+  "sprache": "de"
+}
