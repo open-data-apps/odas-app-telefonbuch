@@ -19,9 +19,16 @@
     "* Als URL muss ein direkter Link angegeben werden. Beispiel:",
     "https://open-data-musterstadt.ckan.de/dataset/4b5752b1-1d68-4ae7-9be5-4a0f2f362092/resource/4f30dd36-bf63-4ab5-b2e5-b09fe0c55900/download/telefonbuch-musterstadt.csv"
   ],
-  "tags-funktion": ["Verwaltungsorganisation", "Bürgerinteraktion"],
-  "tags-dateityp": ["csv"],
-  "tags-datenart": ["Kontaktdaten"],
+  "tags-funktion": [
+    "Verwaltungsorganisation",
+    "Bürgerinteraktion"
+  ],
+  "tags-dateityp": [
+    "csv"
+  ],
+  "tags-datenart": [
+    "Kontaktdaten"
+  ],
   "screenshots": [
     "assets/Desktop_Screenshot.png",
     "assets/Mobile_Screenshot.png"
@@ -145,7 +152,10 @@
       "format": {
         "typ": "markdown"
       },
-      "default": ["_multiline_", "Alle Daten sind geschützt."],
+      "default": [
+        "_multiline_",
+        "Alle Daten sind geschützt."
+      ],
       "erforderlich": "ja"
     },
     "urldaten": {
@@ -184,10 +194,29 @@
       "hilfe": "Angabe der App-Sprache",
       "format": {
         "typ": "dropdown",
-        "optionen": ["de"],
+        "optionen": [
+          "de"
+        ],
         "default": "de"
       },
       "erforderlich": "ja"
+    },
+    "urlDaten": {
+      "label": "URL zum Datensatz im ODP",
+      "hilfe": "Der Datensatz im Open Data Portal mit den Daten der Telefonbuch App",
+      "format": {
+        "typ": "url"
+      },
+      "default": "",
+      "beispiel": "",
+      "erforderlich": "ja"
     }
-  }
+  },
+  "daten": {
+    "beschreibung": "Die Telefonbuch-App verarbeitet konfigurierbare Open-Data-Ressourcen aus dem Open Data Portal (z.B. JSON- oder CSV-Endpunkte).",
+    "schema": "",
+    "beispiel": "",
+    "beispiel-url": ""
+  },
+  "api-version": "1"
 }
