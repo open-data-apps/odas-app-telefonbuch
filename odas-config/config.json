@@ -13,5 +13,7 @@
   "urlDaten": "<a href='https://offenedaten.esslingen.de/Ondics_GmbH' target='_blank'>https://offenedaten.esslingen.de/Ondics_GmbH</a>",
   "fusszeile": "(C) Copyright 2025 | Inhalt: Stadt Esslingen | App: Mueller GmbH | Provided by: Ondics GmbH",
   "apiurl": "https://open-data-musterstadt.ckan.de/dataset/4b5752b1-1d68-4ae7-9be5-4a0f2f362092/resource/4f30dd36-bf63-4ab5-b2e5-b09fe0c55900/download/telefonbuch-musterstadt.csv",
-  "sprache": "de"
+  "sprache": "de",
+  "datenStand": "",
+  "weiterfuehrendeLinks": ""
 }

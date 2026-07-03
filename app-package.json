@@ -3,21 +3,33 @@
   "app-entwickler-name": "mueller-gmbh",
   "name-in-url": "telefonbuch",
   "name": "Telefonbuch",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "odas-app-icon": "assets/odas-app-icon.svg",
   "app-icon": "assets/app-icon.png",
   "kurzbeschreibung": "Schnell die richtige Ansprechperson finden: Diese App listet alle Kontaktdaten – durchsuchbar und klickbereit.",
   "beschreibung": [
     "_multiline_",
-    "Das Telefonbuch zeigt Namen, Stellen und Telefonnummern an. Die Daten werden aus einem Open",
-    "Data Portal bezogen und müssen in Form von CSV-Dateien vorliegen.",
-    "Die Daten müssen in einem Open Data Portal",
-    "wie folgt aufgebaut sein: \n",
-    "* Datensatz: Mit allen Telefonbüchern als Ressourcen",
-    "* Ressourcen: Jede Telefonbuch Ressource muss als CSV Datei angelegt werden. Diese müssen folgendem Format entsprechen:",
-    "name, stelle, telefonnummer",
-    "* Als URL muss ein direkter Link angegeben werden. Beispiel:",
-    "https://open-data-musterstadt.ckan.de/dataset/4b5752b1-1d68-4ae7-9be5-4a0f2f362092/resource/4f30dd36-bf63-4ab5-b2e5-b09fe0c55900/download/telefonbuch-musterstadt.csv"
+    "## Über diese App",
+    "Dieses Telefonbuch hilft Ihnen, die richtige Durchwahl in der Stadtverwaltung zu finden. Die App listet Namen, Stellen und Telefonnummern übersichtlich in einer durchsuchbaren Tabelle.",
+    "",
+    "## Inhalte",
+    "- Sortierbare und durchsuchbare Tabelle aller Kontakte",
+    "- Direktlinks zum Anrufen per Klick auf die Telefonnummer",
+    "- Optimiert für Desktop und mobile Geräte",
+    "",
+    "## Nutzung",
+    "Durchsuchen Sie die Tabelle nach Namen oder Stellen. Ein Klick auf eine Telefonnummer öffnet direkt die Telefon-App Ihres Geräts. Die Tabelle lässt sich nach jeder Spalte sortieren.",
+    "",
+    "## Für wen ist diese App?",
+    "Dieses Telefonbuch hilft Ihnen, die richtige Durchwahl in der Stadtverwaltung zu finden. Es richtet sich an alle Bürger:innen mit Verwaltungsanliegen.",
+    "",
+    "## Datenquelle",
+    "- **Open Data Portal:** <a href=\"{{odp.url}}\" target=\"_blank\">{{odp.name}}</a>",
+    "- **Datensatz:** <a href=\"{{appinstanz.urlDaten}}\" target=\"_blank\">Telefonbuch-Datensatz im Open Data Portal</a>",
+    "- **Ressource:** <a href=\"{{appinstanz.apiurl}}\" target=\"_blank\">Telefonbuch-CSV</a>",
+    "",
+    "## Open Data App Store",
+    "Der Open Data App Store wird betrieben von <a href=\"{{odas.betreiber.url}}\">{{odas.betreiber.name}}</a>."
   ],
   "tags-funktion": [
     "Verwaltungsorganisation",
@@ -158,16 +170,6 @@
       ],
       "erforderlich": "ja"
     },
-    "urldaten": {
-      "label": "URL zum Datensatz im ODP",
-      "hilfe": "Der Datensatz im Open Data Portal mit den CSV-Einzeldateien des Telefonbuchs",
-      "format": {
-        "typ": "url"
-      },
-      "default": "{{appconfig.datensatz-url}}",
-      "beispiel": "https://open-data-musterstadt.ckan.de/dataset/telefonbuch-musterstadt",
-      "erforderlich": "ja"
-    },
     "fusszeile": {
       "label": "Fußzeile",
       "hilfe": "Wird auf der Website unten in der Fusszeile angezeigt.",
@@ -210,6 +212,20 @@
       "default": "",
       "beispiel": "",
       "erforderlich": "ja"
+    },
+    "datenStand": {
+      "label": "Datenstand",
+      "hilfe": "Freitext-Datum, z.B. 'Stand: Januar 2025'. Leer = ausgeblendet.",
+      "format": { "typ": "string", "laenge": 60 },
+      "default": "",
+      "erforderlich": "nein"
+    },
+    "weiterfuehrendeLinks": {
+      "label": "Weiterführende Links",
+      "hilfe": "Verwandte Datensätze / Hintergrundquellen (Markdown/HTML). Leer = ausgeblendet.",
+      "format": { "typ": "markdown" },
+      "default": "",
+      "erforderlich": "nein"
     }
   },
   "daten": {

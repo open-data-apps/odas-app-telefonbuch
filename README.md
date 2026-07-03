@@ -10,6 +10,8 @@ Die App ist eine "ODAP App V1".
 
 - Anzeie Kontakte (sortierbar, suchbar, Tel-Direktlinks)
 - Anzeige Header + Burgermenü
+- Datenfrische-Indikator
+- Weiterführende Links (konfigurierbar)
 - getestet auf mobile & Desktop
 
 ## Entwicklung

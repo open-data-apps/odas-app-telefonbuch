@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.2.0
+
+- ENH: escapeHtml()-Hilfsfunktion für XSS-Schutz hinzugefügt
+- ENH: renderWeitereInfos()-Sektion mit konfigurierbaren weiterführenden Links
+- ENH: Datenfrische-Indikator aus HTTP Last-Modified bzw. konfigurierbarem datenStand
+- ENH: Beschreibung aktualisiert mit „Für wen ist diese App?“-Abschnitt
+- FIX: Doppelte urldaten/urlDaten-Konfigurationsschlüssel entfernt
+
 ## 7.11.2024
 
 - ENH: Initial commit
