@@ -20,19 +20,41 @@ function renderWeitereInfos(configdata) {
   const links = (configdata.weiterfuehrendeLinks || "").trim();
   if (!links) return "";
   return (
-    '<section class="tb-weitere-infos mt-4">' +
-    '<h2 class="h5 mb-3">Weitere Informationen</h2>' +
-    '<div class="tb-weitere-infos-content">' +
+    '<div class="card shadow-sm mt-4"><div class="card-body">' +
+    '<button class="tb-toggle btn btn-link text-decoration-none d-flex w-100 justify-content-between align-items-center p-0 collapsed" type="button" ' +
+    'data-bs-toggle="collapse" data-bs-target="#tb-weitere-infos-body" ' +
+    'aria-expanded="false" aria-controls="tb-weitere-infos-body">' +
+    '<h5 class="card-title mb-0">Weitere Informationen</h5>' +
+    '<span class="tb-chevron" aria-hidden="true">&#9662;</span>' +
+    "</button>" +
+    '<div id="tb-weitere-infos-body" class="collapse mt-2">' +
     links +
-    "</div></section>"
+    "</div>" +
+    "</div></div>"
   );
 }
 
-function extractDatenStand(proxyResponse) {
-  const raw = proxyResponse?.lastModified || null;
-  if (!raw) return null;
-  const d = new Date(raw);
-  return isNaN(d.getTime()) ? null : d.toLocaleDateString("de-DE");
+function renderMethodikbox(configdata) {
+  const hinweis = String(configdata.datenquelleHinweis || "").trim();
+  const stand = String(configdata.datenStand || "").trim();
+  if (!hinweis && !stand) return "";
+  const standZeile = stand
+    ? '<p class="text-muted small mb-2">' + escapeHtml(stand) + "</p>"
+    : "";
+  return (
+    '<div class="card shadow-sm mt-4"><div class="card-body">' +
+    '<button class="tb-toggle btn btn-link text-decoration-none d-flex w-100 justify-content-between align-items-center p-0 collapsed" type="button" ' +
+    'data-bs-toggle="collapse" data-bs-target="#tb-methodik-body" ' +
+    'aria-expanded="false" aria-controls="tb-methodik-body">' +
+    '<h5 class="card-title mb-0">Methodik &amp; Datenquelle</h5>' +
+    '<span class="tb-chevron" aria-hidden="true">&#9662;</span>' +
+    "</button>" +
+    '<div id="tb-methodik-body" class="collapse mt-2">' +
+    standZeile +
+    hinweis +
+    "</div>" +
+    "</div></div>"
+  );
 }
 
 function app(configData, enclosingHtmlDivElement) {
@@ -73,21 +95,6 @@ async function loadCSV(configData) {
     if (result.contentType !== "text/csv") {
       console.error("Die geladene Datei ist keine CSV-Datei.");
       return;
-    }
-
-    let stand = extractDatenStand(result);
-    if (!stand) {
-      const cfgStand = String(configData.datenStand || "").trim();
-      stand = cfgStand || null;
-    }
-    if (stand) {
-      const mainContent = document.getElementById("main-content");
-      if (mainContent) {
-        const frischeEl = document.createElement("div");
-        frischeEl.className = "text-muted small text-end mb-2";
-        frischeEl.textContent = "Aktualisiert: " + stand;
-        mainContent.insertBefore(frischeEl, mainContent.firstChild);
-      }
     }
 
     const csvData = result.content;
@@ -152,6 +159,16 @@ async function loadCSV(configData) {
         }
       },
     });
+
+    const methodikHTML = renderMethodikbox(configData);
+    if (methodikHTML) {
+      const mainContent = document.getElementById("main-content");
+      if (mainContent) {
+        const methodikEl = document.createElement("div");
+        methodikEl.innerHTML = methodikHTML;
+        mainContent.appendChild(methodikEl);
+      }
+    }
 
     const weitereHTML = renderWeitereInfos(configData);
     if (weitereHTML) {
