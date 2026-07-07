@@ -5,7 +5,21 @@
   "icon": "logo_ondics.png",
   "brandingCSS": "",
   "brandingCSSFile": "",
-  "beschreibung": "abc",
+  "beschreibung": [
+    "<p>Die Telefonbuch-App macht Kontakt- und Zuständigkeitsdaten schnell durchsuchbar.</p>",
+    "<p>Sie zeigt Namen, Stellen, Telefonnummern und weitere Kontakthinweise in einer übersichtlichen Oberfläche.</p>",
+    "<h3>Inhalte</h3>",
+    "<p>Die App verarbeitet tabellarische Kontaktdaten aus einer konfigurierten Quelle. Suche, Filter und klickbare Kontaktinformationen unterstützen den direkten Zugang zur richtigen Ansprechperson.</p>",
+    "<h3>Nutzung</h3>",
+    "<p>Suchen Sie nach Namen, Organisationseinheiten oder Stichworten und öffnen Sie die passenden Kontaktdaten. Die Pflege und Aktualität der Angaben hängt von der Datenquelle ab.</p>",
+    "<h3>Für wen ist diese App?</h3>",
+    "<p>Die App richtet sich an Bürger:innen, Verwaltungen, Organisationen und Service-Teams, die Ansprechpersonen leichter auffindbar machen möchten. Besondere Datenkenntnisse sind für die Nutzung nicht erforderlich.</p>",
+    "<h3>Datenquelle</h3>",
+    "<p>Die Kontaktdaten werden aus der konfigurierten CSV-Ressource geladen.</p>",
+    "<ul><li><strong>Open Data Portal:</strong> <a href=\"{{odp.url}}\" target=\"_blank\" rel=\"noopener\">{{odp.name}}</a></li><li><strong>Ressource/API-Endpunkt:</strong> <a href=\"{{appconfig.datensatz-apiurl}}\" target=\"_blank\" rel=\"noopener\">Konfigurierte Telefonbuch-Ressource</a></li></ul>",
+    "<h3>Open Data App Store</h3>",
+    "<p>Diese App ist für den Open Data App Store vorbereitet und kann mit Kontakt- oder Telefonbuchdaten anderer Organisationen betrieben werden.</p>"
+  ],
   "kontakt": "Tel.: <a href='tel:+49711310093100'>0711-31009-3100</a><br>Fax: <a href='tel:+49711310093108'>0711-31009-3108</a><br>E-Mail: <a href='mailto:info@ondics.de'>info@ondics.de</a>",
   "impressum": "Ondics GmbH<br>Wolfgang Clauss<br>Blumenstrasse 19<br><a href='https://www.ondics.de/' target='_blank'>https://www.ondics.de/</a>",
   "datenschutz": "abc",
@@ -14,6 +28,7 @@
   "fusszeile": "(C) Copyright 2025 | Inhalt: Stadt Esslingen | App: Mueller GmbH | Provided by: Ondics GmbH",
   "apiurl": "https://open-data-musterstadt.ckan.de/dataset/4b5752b1-1d68-4ae7-9be5-4a0f2f362092/resource/4f30dd36-bf63-4ab5-b2e5-b09fe0c55900/download/telefonbuch-musterstadt.csv",
   "sprache": "de",
-  "datenStand": "",
-  "weiterfuehrendeLinks": ""
+  "datenStand": "Stand: abhängig von der konfigurierten Telefonbuch-Ressource",
+  "weiterfuehrendeLinks": "<ul><li><a href=\"{{odp.url}}\" target=\"_blank\" rel=\"noopener\">{{odp.name}}</a></li><li><a href=\"{{appconfig.datensatz-apiurl}}\" target=\"_blank\" rel=\"noopener\">Konfigurierte Telefonbuch-Ressource</a></li><li><a href=\"https://open-data-app-store.de\" target=\"_blank\" rel=\"noopener\">Open Data App Store</a></li></ul>",
+  "datenquelleHinweis": "<p>Die Telefonbuch-App lädt tabellarische Kontaktdaten aus der konfigurierten CSV-Ressource und macht sie durchsuchbar. Namen, Stellen und Telefonnummern werden aus der Quelle übernommen; Aktualität und Vollständigkeit hängen von der Pflege des Datensatzes ab.</p>"
 }

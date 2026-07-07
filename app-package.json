@@ -9,27 +9,19 @@
   "kurzbeschreibung": "Schnell die richtige Ansprechperson finden: Diese App listet alle Kontaktdaten – durchsuchbar und klickbereit.",
   "beschreibung": [
     "_multiline_",
-    "## Über diese App",
-    "Dieses Telefonbuch hilft Ihnen, die richtige Durchwahl in der Stadtverwaltung zu finden. Die App listet Namen, Stellen und Telefonnummern übersichtlich in einer durchsuchbaren Tabelle.",
-    "",
-    "## Inhalte",
-    "- Sortierbare und durchsuchbare Tabelle aller Kontakte",
-    "- Direktlinks zum Anrufen per Klick auf die Telefonnummer",
-    "- Optimiert für Desktop und mobile Geräte",
-    "",
-    "## Nutzung",
-    "Durchsuchen Sie die Tabelle nach Namen oder Stellen. Ein Klick auf eine Telefonnummer öffnet direkt die Telefon-App Ihres Geräts. Die Tabelle lässt sich nach jeder Spalte sortieren.",
-    "",
-    "## Für wen ist diese App?",
-    "Dieses Telefonbuch hilft Ihnen, die richtige Durchwahl in der Stadtverwaltung zu finden. Es richtet sich an alle Bürger:innen mit Verwaltungsanliegen.",
-    "",
-    "## Datenquelle",
-    "- **Open Data Portal:** <a href=\"{{odp.url}}\" target=\"_blank\">{{odp.name}}</a>",
-    "- **Datensatz:** <a href=\"{{appinstanz.urlDaten}}\" target=\"_blank\">Telefonbuch-Datensatz im Open Data Portal</a>",
-    "- **Ressource:** <a href=\"{{appinstanz.apiurl}}\" target=\"_blank\">Telefonbuch-CSV</a>",
-    "",
-    "## Open Data App Store",
-    "Der Open Data App Store wird betrieben von <a href=\"{{odas.betreiber.url}}\">{{odas.betreiber.name}}</a>."
+    "<p>Die Telefonbuch-App macht Kontakt- und Zuständigkeitsdaten schnell durchsuchbar.</p>",
+    "<p>Sie zeigt Namen, Stellen, Telefonnummern und weitere Kontakthinweise in einer übersichtlichen Oberfläche.</p>",
+    "<h3>Inhalte</h3>",
+    "<p>Die App verarbeitet tabellarische Kontaktdaten aus einer konfigurierten Quelle. Suche, Filter und klickbare Kontaktinformationen unterstützen den direkten Zugang zur richtigen Ansprechperson.</p>",
+    "<h3>Nutzung</h3>",
+    "<p>Suchen Sie nach Namen, Organisationseinheiten oder Stichworten und öffnen Sie die passenden Kontaktdaten. Die Pflege und Aktualität der Angaben hängt von der Datenquelle ab.</p>",
+    "<h3>Für wen ist diese App?</h3>",
+    "<p>Die App richtet sich an Bürger:innen, Verwaltungen, Organisationen und Service-Teams, die Ansprechpersonen leichter auffindbar machen möchten. Besondere Datenkenntnisse sind für die Nutzung nicht erforderlich.</p>",
+    "<h3>Datenquelle</h3>",
+    "<p>Die Kontaktdaten werden aus der konfigurierten CSV-Ressource geladen.</p>",
+    "<ul><li><strong>Open Data Portal:</strong> <a href=\"{{odp.url}}\" target=\"_blank\" rel=\"noopener\">{{odp.name}}</a></li><li><strong>Ressource/API-Endpunkt:</strong> <a href=\"{{appconfig.datensatz-apiurl}}\" target=\"_blank\" rel=\"noopener\">Konfigurierte Telefonbuch-Ressource</a></li></ul>",
+    "<h3>Open Data App Store</h3>",
+    "<p>Diese App ist für den Open Data App Store vorbereitet und kann mit Kontakt- oder Telefonbuchdaten anderer Organisationen betrieben werden.</p>"
   ],
   "tags-funktion": [
     "Verwaltungsorganisation",
@@ -113,17 +105,19 @@
       },
       "default": [
         "_multiline_",
-        "Die Telefonbuch-App zeigt die Namen, Stellen und Telefonnummern für ausgewählte Telefondatensätze.",
-        "Die Daten werden tagesaktuell gehalten. Bei Änderungen versuchen wir, den Datenbestend immer sofort zu aktualisieren.",
-        "## App-Anbieter",
-        "Die App wird bereit gestellt von <a href=\"{{odp.anbieter.url}}\">{{odp.anbieter.name}}</a>",
-        "## Datenquelle",
-        "Die Daten kommen aus  unserem Open Data Portal <a href=\"{{odp.url}}\">{{odp.name}}</a>",
-        "Die Datenquelle ist in unserem Open Data Portal <a href=\"{{appinstanz.apiurl}}\">{{appinstanz.apiurl}}</a>.",
-        "## Über diese App",
-        "Die App wurde entwickelt von <a href=\"{{app.developer.url}}\">{{app.developer.name}}</a>. App-Version: {{app.version}}.",
-        "## Open Data App Store",
-        "Der Open Data App Store betrieben von <a href=\"{{odas.betreiber.url}}\">{{odas.betreiber.name}}</a>"
+        "<p>Die Telefonbuch-App macht Kontakt- und Zuständigkeitsdaten schnell durchsuchbar.</p>",
+        "<p>Sie zeigt Namen, Stellen, Telefonnummern und weitere Kontakthinweise in einer übersichtlichen Oberfläche.</p>",
+        "<h3>Inhalte</h3>",
+        "<p>Die App verarbeitet tabellarische Kontaktdaten aus einer konfigurierten Quelle. Suche, Filter und klickbare Kontaktinformationen unterstützen den direkten Zugang zur richtigen Ansprechperson.</p>",
+        "<h3>Nutzung</h3>",
+        "<p>Suchen Sie nach Namen, Organisationseinheiten oder Stichworten und öffnen Sie die passenden Kontaktdaten. Die Pflege und Aktualität der Angaben hängt von der Datenquelle ab.</p>",
+        "<h3>Für wen ist diese App?</h3>",
+        "<p>Die App richtet sich an Bürger:innen, Verwaltungen, Organisationen und Service-Teams, die Ansprechpersonen leichter auffindbar machen möchten. Besondere Datenkenntnisse sind für die Nutzung nicht erforderlich.</p>",
+        "<h3>Datenquelle</h3>",
+        "<p>Die Kontaktdaten werden aus der konfigurierten CSV-Ressource geladen.</p>",
+        "<ul><li><strong>Open Data Portal:</strong> <a href=\"{{odp.url}}\" target=\"_blank\" rel=\"noopener\">{{odp.name}}</a></li><li><strong>Ressource/API-Endpunkt:</strong> <a href=\"{{appconfig.datensatz-apiurl}}\" target=\"_blank\" rel=\"noopener\">Konfigurierte Telefonbuch-Ressource</a></li></ul>",
+        "<h3>Open Data App Store</h3>",
+        "<p>Diese App ist für den Open Data App Store vorbereitet und kann mit Kontakt- oder Telefonbuchdaten anderer Organisationen betrieben werden.</p>"
       ],
       "erforderlich": "ja"
     },
@@ -216,15 +210,29 @@
     "datenStand": {
       "label": "Datenstand",
       "hilfe": "Freitext-Datum, z.B. 'Stand: Januar 2025'. Leer = ausgeblendet.",
-      "format": { "typ": "string", "laenge": 60 },
-      "default": "",
+      "format": {
+        "typ": "string",
+        "laenge": 60
+      },
+      "default": "Stand: abhängig von der konfigurierten Telefonbuch-Ressource",
       "erforderlich": "nein"
     },
     "weiterfuehrendeLinks": {
       "label": "Weiterführende Links",
       "hilfe": "Verwandte Datensätze / Hintergrundquellen (Markdown/HTML). Leer = ausgeblendet.",
-      "format": { "typ": "markdown" },
-      "default": "",
+      "format": {
+        "typ": "markdown"
+      },
+      "default": "<ul><li><a href=\"{{odp.url}}\" target=\"_blank\" rel=\"noopener\">{{odp.name}}</a></li><li><a href=\"{{appconfig.datensatz-apiurl}}\" target=\"_blank\" rel=\"noopener\">Konfigurierte Telefonbuch-Ressource</a></li><li><a href=\"https://open-data-app-store.de\" target=\"_blank\" rel=\"noopener\">Open Data App Store</a></li></ul>",
+      "erforderlich": "nein"
+    },
+    "datenquelleHinweis": {
+      "label": "Methodik / Datenquelle-Hinweis",
+      "hilfe": "Herkunft, Erhebungsmethode und Limitierungen (HTML/Markdown). Leer = ausgeblendet.",
+      "format": {
+        "typ": "markdown"
+      },
+      "default": "<p>Die Telefonbuch-App lädt tabellarische Kontaktdaten aus der konfigurierten CSV-Ressource und macht sie durchsuchbar. Namen, Stellen und Telefonnummern werden aus der Quelle übernommen; Aktualität und Vollständigkeit hängen von der Pflege des Datensatzes ab.</p>",
       "erforderlich": "nein"
     }
   },
