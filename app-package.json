@@ -28,7 +28,7 @@
     "Bürgerinteraktion"
   ],
   "tags-dateityp": [
-    "csv"
+    "CSV"
   ],
   "tags-datenart": [
     "Kontaktdaten"
@@ -38,7 +38,6 @@
     "assets/Mobile_Screenshot.png"
   ],
   "branding-css": "",
-  "apiversion": "1",
   "instanz-config": {
     "seitentitel": {
       "label": "Seitentitel",
