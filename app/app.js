@@ -16,6 +16,84 @@ function escapeHtml(str) {
     .replace(/'/g, "&#39;");
 }
 
+function isOdasProxyEnabled(configdata = {}) {
+  return String(configdata.proxyAktiv || "").trim().toLowerCase() === "ja";
+}
+
+function extractPathFromUrl(url) {
+  try {
+    const parsedUrl = new URL(url);
+    return parsedUrl.pathname + parsedUrl.search;
+  } catch (_error) {
+    return String(url || "");
+  }
+}
+
+function getOdasAppBasePath(pathname) {
+  let appPath =
+    pathname === undefined
+      ? typeof window !== "undefined"
+        ? window.location.pathname
+        : "/"
+      : String(pathname || "/");
+
+  if (!appPath.endsWith("/")) {
+    const lastSlashIndex = appPath.lastIndexOf("/");
+    const lastSegment = appPath.substring(lastSlashIndex + 1);
+    if (lastSegment.includes(".")) {
+      appPath = appPath.substring(0, lastSlashIndex + 1);
+    }
+  }
+
+  return appPath.replace(/\/+$/, "");
+}
+
+function getOdasProxyEndpoint(targetUrl, pathname) {
+  const appPath = getOdasAppBasePath(pathname);
+  return `${appPath}/odp-data?path=${encodeURIComponent(
+    extractPathFromUrl(targetUrl),
+  )}`;
+}
+
+async function fetchViaOdasProxy(targetUrl) {
+  const response = await fetch(getOdasProxyEndpoint(targetUrl), {
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    throw new Error(`ODAS-Proxy-Fehler: HTTP ${response.status}`);
+  }
+
+  const proxyData = await response.json();
+  if (!proxyData || typeof proxyData.content !== "string") {
+    throw new Error("ODAS-Proxy-Antwort enthält keinen content-String.");
+  }
+
+  return proxyData.content;
+}
+
+async function fetchOdasResource(targetUrl, configdata = {}) {
+  if (isOdasProxyEnabled(configdata)) {
+    return fetchViaOdasProxy(targetUrl);
+  }
+
+  try {
+    const response = await fetch(targetUrl);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    return response.text();
+  } catch (error) {
+    throw new Error(
+      `Direkter Datenabruf fehlgeschlagen (${error.message}). Bitte prüfen Sie die Daten-URL und die CORS-Freigabe der Datenquelle.`,
+    );
+  }
+}
+
+async function fetchOdasJson(targetUrl, configdata = {}) {
+  return JSON.parse(await fetchOdasResource(targetUrl, configdata));
+}
+
 function renderWeitereInfos(configdata) {
   const links = (configdata.weiterfuehrendeLinks || "").trim();
   if (!links) return "";
@@ -58,7 +136,6 @@ function renderMethodikbox(configdata) {
 }
 
 function app(configData, enclosingHtmlDivElement) {
-  loadCSV(configData);
   enclosingHtmlDivElement.innerHTML = `<div class="table-responsive">
       <table id="phonebook-table" class="table table-striped table-hover">
         <thead>
@@ -72,32 +149,12 @@ function app(configData, enclosingHtmlDivElement) {
         <!-- Dynamische Inhalte werden hier eingefügt -->
         </tbody>
       </table></div>`;
+  loadCSV(configData);
 }
 // Funktion zum Laden der CSV-Dateien aus der API
 async function loadCSV(configData) {
   try {
-    // Aktuellen Pfad extrahieren, z. B. /view/odpname/appname/instanzid
-    const fullPath = window.location.pathname.replace(/\/+$/, "");
-
-    // Proxy-Endpunkt zusammensetzen
-    const proxyEndpoint = `${fullPath}/odp-data?path=${configData.apiurl}`;
-
-    const response = await fetch(proxyEndpoint, {
-      method: "POST",
-    });
-
-    if (!response.ok) {
-      console.error(`Fehler beim Abrufen der Daten vom Proxy-Endpunkt`);
-      return;
-    }
-
-    const result = await response.json();
-    if (result.contentType !== "text/csv") {
-      console.error("Die geladene Datei ist keine CSV-Datei.");
-      return;
-    }
-
-    const csvData = result.content;
+    const csvData = await fetchOdasResource(configData.apiurl, configData);
     const rows = csvData.split("\n").slice(1);
 
     const tableBody = document.getElementById("phonebook-body");
@@ -181,6 +238,12 @@ async function loadCSV(configData) {
     }
   } catch (error) {
     console.error("Fehler beim Laden der CSV-Daten:", error);
+    const tableBody = document.getElementById("phonebook-body");
+    if (tableBody) {
+      tableBody.innerHTML = `<tr><td colspan="3" class="text-danger"><strong>Fehler beim Laden:</strong> ${escapeHtml(
+        error.message,
+      )}</td></tr>`;
+    }
   }
 }
 

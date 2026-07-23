@@ -1,5 +1,6 @@
 {
   "apiVersion": "1",
+  "proxyAktiv": "nein",
   "titel": "Telefonbuch der Ondics GmbH",
   "seitentitel": "Telefonbuch",
   "icon": "logo_ondics.png",
