@@ -1,11 +1,11 @@
 {
   "app-entwickler-id": "12343",
-  "app-entwickler-name": "mueller-gmbh",
+  "app-entwickler-name": "ondics-gmbh",
   "name-in-url": "telefonbuch",
   "name": "Telefonbuch",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "odas-app-icon": "assets/odas-app-icon.svg",
-  "app-icon": "assets/app-icon.png",
+  "app-icon": "assets/odas-app-icon.svg",
   "kurzbeschreibung": "Schnell die richtige Ansprechperson finden: Diese App listet alle Kontaktdaten – durchsuchbar und klickbereit.",
   "beschreibung": [
     "_multiline_",
@@ -43,16 +43,6 @@
       "label": "Seitentitel",
       "hilfe": "Der Seitentitel wird im Browser-Tab der App angezeigt",
       "default": "Telefon-App",
-      "format": {
-        "typ": "string",
-        "laenge": 50
-      },
-      "erforderlich": "ja"
-    },
-    "lizenz": {
-      "label": "Lizenz",
-      "hilfe": "Angabe der Lizenz, die für die Nutzung der App gilt.",
-      "default": "Open Software License (OSL)",
       "format": {
         "typ": "string",
         "laenge": 50
@@ -155,7 +145,7 @@
       "label": "Fußzeile",
       "hilfe": "Wird auf der Website unten in der Fusszeile angezeigt.",
       "format": {
-        "typ": "String",
+        "typ": "string",
         "laenge": 50
       },
       "default": "(C) Copyright {{jahr}} | App & Daten: {{odp.anbieter.name}} | App-Entwickler: {{app.developer.name}} | ODAS: {{odas.betreiber.name}}",
@@ -188,12 +178,12 @@
     "sprache": {
       "label": "Sprache der App",
       "hilfe": "Angabe der App-Sprache",
+      "default": "de",
       "format": {
         "typ": "dropdown",
         "optionen": [
           "de"
-        ],
-        "default": "de"
+        ]
       },
       "erforderlich": "ja"
     },
@@ -234,11 +224,31 @@
       },
       "default": "<p>Die Telefonbuch-App lädt tabellarische Kontaktdaten aus der konfigurierten CSV-Ressource und macht sie durchsuchbar. Namen, Stellen und Telefonnummern werden aus der Quelle übernommen; Aktualität und Vollständigkeit hängen von der Pflege des Datensatzes ab.</p>",
       "erforderlich": "nein"
+    },
+    "brandingCSS": {
+      "label": "Zusätzliches Branding-CSS",
+      "hilfe": "Optionaler CSS-Code für die konkrete App-Instanz.",
+      "default": "",
+      "format": {
+        "typ": "string",
+        "laenge": 10000
+      },
+      "erforderlich": "nein"
+    },
+    "brandingCSSFile": {
+      "label": "Branding-CSS-Datei",
+      "hilfe": "Optionale URL zu einer zusätzlichen CSS-Datei für die konkrete App-Instanz.",
+      "default": "",
+      "format": {
+        "typ": "url",
+        "laenge": 500
+      },
+      "erforderlich": "nein"
     }
   },
   "daten": {
     "beschreibung": "Die Telefonbuch-App verarbeitet konfigurierbare Open-Data-Ressourcen aus dem Open Data Portal (z.B. JSON- oder CSV-Endpunkte).",
-    "schema": "",
+    "schema": "assets/schema.json",
     "beispiel": "",
     "beispiel-url": ""
   },
