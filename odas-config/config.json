@@ -5,7 +5,7 @@
   "seitentitel": "Telefonbuch",
   "icon": "logo_ondics.png",
   "brandingCSS": "",
-  "brandingCSSFile": "",
+  "brandingCSSFile": "../assets/branding.css",
   "beschreibung": [
     "<p>Die Telefonbuch-App macht Kontakt- und Zuständigkeitsdaten schnell durchsuchbar.</p>",
     "<p>Sie zeigt Namen, Stellen, Telefonnummern und weitere Kontakthinweise in einer übersichtlichen Oberfläche.</p>",
