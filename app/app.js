@@ -94,6 +94,63 @@ async function fetchOdasJson(targetUrl, configdata = {}) {
   return JSON.parse(await fetchOdasResource(targetUrl, configdata));
 }
 
+// ── CSV-PARSING ──────────────────────────────────────────────────────────────
+// Kommunale Open-Data-CSVs sind häufig Semikolon-getrennt, enthalten gequotete
+// Felder und CRLF-Zeilenenden. Naives split(",") verwirft solche Zeilen still.
+
+function detectCsvDelimiter(text) {
+  const firstLine = String(text).split(/\r\n|\r|\n/)[0] || "";
+  let best = ",";
+  let bestCount = 0;
+  [";", ",", "\t", "|"].forEach((cand) => {
+    let count = 0;
+    let inQuotes = false;
+    for (let i = 0; i < firstLine.length; i++) {
+      const c = firstLine[i];
+      if (c === '"') inQuotes = !inQuotes;
+      else if (c === cand && !inQuotes) count++;
+    }
+    if (count > bestCount) {
+      bestCount = count;
+      best = cand;
+    }
+  });
+  return best;
+}
+
+function parseCsv(text, delimiter) {
+  const sep = delimiter || detectCsvDelimiter(text);
+  const rows = [];
+  let row = [];
+  let field = "";
+  let inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"' && text[i + 1] === '"') {
+        field += '"';
+        i++;
+      } else if (c === '"') inQuotes = false;
+      else field += c;
+    } else if (c === '"') inQuotes = true;
+    else if (c === sep) {
+      row.push(field);
+      field = "";
+    } else if (c === "\n" || c === "\r") {
+      if (c === "\r" && text[i + 1] === "\n") i++;
+      row.push(field);
+      field = "";
+      if (row.length > 1 || row[0] !== "") rows.push(row);
+      row = [];
+    } else field += c;
+  }
+  if (field !== "" || row.length) {
+    row.push(field);
+    rows.push(row);
+  }
+  return rows;
+}
+
 function renderWeitereInfos(configdata) {
   const links = (configdata.weiterfuehrendeLinks || "").trim();
   if (!links) return "";
@@ -136,8 +193,9 @@ function renderMethodikbox(configdata) {
 }
 
 function app(configData, enclosingHtmlDivElement) {
-  enclosingHtmlDivElement.innerHTML = `<div class="table-responsive">
-      <table id="phonebook-table" class="table table-striped table-hover">
+  enclosingHtmlDivElement.innerHTML = `<div id="tb-status"></div>
+      <div class="table-responsive">
+      <table id="tb-phonebook-table" class="table table-striped table-hover">
         <thead>
           <tr>
             <th>Name</th>
@@ -145,46 +203,80 @@ function app(configData, enclosingHtmlDivElement) {
             <th>Telefonnummer</th>
           </tr>
         </thead>
-        <tbody id="phonebook-body">
+        <tbody id="tb-phonebook-body">
         <!-- Dynamische Inhalte werden hier eingefügt -->
         </tbody>
       </table></div>`;
-  loadCSV(configData);
+  loadCSV(configData, enclosingHtmlDivElement);
 }
+
+function setTelefonbuchStatus(root, html) {
+  const status = root && root.querySelector("#tb-status");
+  if (status) status.innerHTML = html || "";
+}
+
 // Funktion zum Laden der CSV-Dateien aus der API
-async function loadCSV(configData) {
+async function loadCSV(configData, enclosingHtmlDivElement) {
+  const root = enclosingHtmlDivElement;
   try {
     const csvData = await fetchOdasResource(configData.apiurl, configData);
-    const rows = csvData.split("\n").slice(1);
+    const rows = parseCsv(csvData);
 
-    const tableBody = document.getElementById("phonebook-body");
-    rows.forEach((row) => {
-      const cols = row.split(",");
-      if (cols.length === 3 && cols[0].trim() !== "") {
-        const tr = document.createElement("tr");
+    const tableBody = root.querySelector("#tb-phonebook-body");
+    // Kopfzeile überspringen; Zeilen mit zu wenigen Spalten werden gezählt,
+    // nicht stillschweigend verworfen.
+    const datenzeilen = rows.slice(1);
+    let uebersprungen = 0;
+    let uebernommen = 0;
 
-        const nameCell = document.createElement("td");
-        nameCell.textContent = cols[0].trim();
-        tr.appendChild(nameCell);
-
-        const stelleCell = document.createElement("td");
-        stelleCell.textContent = cols[1].trim();
-        tr.appendChild(stelleCell);
-
-        const telCell = document.createElement("td");
-        const telLink = document.createElement("a");
-        telLink.href = `tel:${cols[2].trim()}`;
-        telLink.textContent = cols[2].trim();
-        telLink.style.textDecoration = "underline";
-        telCell.appendChild(telLink);
-        tr.appendChild(telCell);
-
-        tableBody.appendChild(tr);
+    datenzeilen.forEach((cols) => {
+      const name = (cols[0] || "").trim();
+      if (cols.length < 3 || name === "") {
+        uebersprungen++;
+        return;
       }
+      uebernommen++;
+      const tr = document.createElement("tr");
+
+      const nameCell = document.createElement("td");
+      nameCell.textContent = name;
+      tr.appendChild(nameCell);
+
+      const stelleCell = document.createElement("td");
+      stelleCell.textContent = (cols[1] || "").trim();
+      tr.appendChild(stelleCell);
+
+      const telefon = (cols[2] || "").trim();
+      const telCell = document.createElement("td");
+      const telLink = document.createElement("a");
+      telLink.href = `tel:${telefon}`;
+      telLink.textContent = telefon;
+      telLink.style.textDecoration = "underline";
+      telCell.appendChild(telLink);
+      tr.appendChild(telCell);
+
+      tableBody.appendChild(tr);
     });
 
+    if (uebernommen === 0) {
+      setTelefonbuchStatus(
+        root,
+        '<div class="alert alert-info" role="alert">Keine Daten gefunden.</div>',
+      );
+    } else if (uebersprungen > 0) {
+      console.warn(
+        `Telefonbuch: ${uebersprungen} Zeile(n) ohne verwertbare Spalten übersprungen.`,
+      );
+      setTelefonbuchStatus(
+        root,
+        '<div class="alert alert-warning" role="alert">' +
+          escapeHtml(String(uebersprungen)) +
+          " Eintrag/Einträge der Datenquelle konnten nicht gelesen werden und fehlen in dieser Liste.</div>",
+      );
+    }
+
     // DataTable initialisieren
-    $("#phonebook-table").DataTable({
+    $(root.querySelector("#tb-phonebook-table")).DataTable({
       language: {
         decimal: ",",
         thousands: ".",
@@ -219,31 +311,26 @@ async function loadCSV(configData) {
 
     const methodikHTML = renderMethodikbox(configData);
     if (methodikHTML) {
-      const mainContent = document.getElementById("main-content");
-      if (mainContent) {
-        const methodikEl = document.createElement("div");
-        methodikEl.innerHTML = methodikHTML;
-        mainContent.appendChild(methodikEl);
-      }
+      const methodikEl = document.createElement("div");
+      methodikEl.innerHTML = methodikHTML;
+      root.appendChild(methodikEl);
     }
 
     const weitereHTML = renderWeitereInfos(configData);
     if (weitereHTML) {
-      const mainContent = document.getElementById("main-content");
-      if (mainContent) {
-        const weitereEl = document.createElement("div");
-        weitereEl.innerHTML = weitereHTML;
-        mainContent.appendChild(weitereEl);
-      }
+      const weitereEl = document.createElement("div");
+      weitereEl.innerHTML = weitereHTML;
+      root.appendChild(weitereEl);
     }
   } catch (error) {
     console.error("Fehler beim Laden der CSV-Daten:", error);
-    const tableBody = document.getElementById("phonebook-body");
-    if (tableBody) {
-      tableBody.innerHTML = `<tr><td colspan="3" class="text-danger"><strong>Fehler beim Laden:</strong> ${escapeHtml(
-        error.message,
-      )}</td></tr>`;
-    }
+    setTelefonbuchStatus(
+      root,
+      '<div class="alert alert-danger" role="alert">Die Daten konnten nicht geladen werden. ' +
+        "Bitte versuchen Sie es später erneut.</div>",
+    );
+    const tableBody = root.querySelector("#tb-phonebook-body");
+    if (tableBody) tableBody.innerHTML = "";
   }
 }
 

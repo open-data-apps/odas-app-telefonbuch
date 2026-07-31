@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.8.0 - 2026-07-31
+- FIX: CSV-Zerlegung auf den Konventions-Parser umgestellt (F-14) - Semikolon-Quellen,
+  gequotete Felder mit Komma und CRLF-Zeilenenden werden korrekt gelesen
+- FIX: Zeilen ohne verwertbare Spalten werden gezaehlt und als Hinweis angezeigt statt
+  stillschweigend verworfen
+- ENH: Empty-State "Keine Daten gefunden." und sichtbarer Fehlerzustand ergaenzt
+- CHG: DOM-Zugriffe an den App-Container gebunden, IDs mit Praefix tb- versehen (F-25)
+
 ## 1.7.0 - 2026-07-31
 - CHG: fehlendes Pflicht-Asset assets/branding.css ergaenzt und brandingCSSFile lokal aktiviert
 

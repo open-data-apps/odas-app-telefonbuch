@@ -1,4 +1,4 @@
-#phonebook-table {
+#tb-phonebook-table {
   height: auto;
   text-align: center;
 }
@@ -13,8 +13,8 @@
 
 /* Mobile Geräte */
 @media (max-width: 768px) {
-  #phonebook-table td,
-  #phonebook-table th {
+  #tb-phonebook-table td,
+  #tb-phonebook-table th {
     word-wrap: break-word;
     max-width: 150px;
     font-size: 12px;
