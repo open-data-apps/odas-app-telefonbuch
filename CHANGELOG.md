@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.9.0 - 2026-08-04
+- FIX: Drittanbieter (CDN, Kartendienste) in `datenschutz`-Default und README dokumentiert (F-07 Teil 1)
+- FIX: Bootstrap CSS/JS auf einheitlich 5.3.8 gezogen (vorher gemischt 5.3.0/5.3.1 bzw. 5.3.0/5.3.0) (F-31)
+- FIX: lokale `odas-config/config.json`: Platzhalterwert `"abc"` in `datenschutz` durch den App-Paket-Default ersetzt
+
 ## 1.8.0 - 2026-07-31
 - FIX: CSV-Zerlegung auf den Konventions-Parser umgestellt (F-14) - Semikolon-Quellen,
   gequotete Felder mit Komma und CRLF-Zeilenenden werden korrekt gelesen
