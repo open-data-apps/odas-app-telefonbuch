@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.14.0 - 2026-08-07
+- FIX: Bootstrap-Ziele instanzeindeutig machen (F-32): `data-bs-target`, `aria-controls` und die div-IDs der Methodik-Box (`tb-methodik-body`) und der Box „Weitere Informationen" (`tb-weitere-infos-body`) werden pro App-Instanz mit einer UID versehen (`tb-methodik-body-i1`, `-i2`, …), damit mehrere Instanzen der App auf einer Seite nicht kollidieren
+
 ## 1.13.0 - 2026-08-06
 - FIX: Datenschutzangabe beschreibt den tatsaechlichen Stand nach dem Vendoring (Welle G)
 

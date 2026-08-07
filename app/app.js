@@ -6,6 +6,8 @@
  * @returns {string} - darzustellendes HTML
  */
 
+let tbInstanzZaehler = 0;
+
 function escapeHtml(str) {
   const s = String(str ?? "");
   return s
@@ -151,25 +153,25 @@ function parseCsv(text, delimiter) {
   return rows;
 }
 
-function renderWeitereInfos(configdata) {
+function renderWeitereInfos(configdata, uid) {
   const links = (configdata.weiterfuehrendeLinks || "").trim();
   if (!links) return "";
   return (
     '<div class="card shadow-sm mt-4"><div class="card-body">' +
     '<button class="tb-toggle btn btn-link text-decoration-none d-flex w-100 justify-content-between align-items-center p-0 collapsed" type="button" ' +
-    'data-bs-toggle="collapse" data-bs-target="#tb-weitere-infos-body" ' +
-    'aria-expanded="false" aria-controls="tb-weitere-infos-body">' +
+    'data-bs-toggle="collapse" data-bs-target="#tb-weitere-infos-body-' + uid + '" ' +
+    'aria-expanded="false" aria-controls="tb-weitere-infos-body-' + uid + '">' +
     '<h5 class="card-title mb-0">Weitere Informationen</h5>' +
     '<span class="tb-chevron" aria-hidden="true">&#9662;</span>' +
     "</button>" +
-    '<div id="tb-weitere-infos-body" class="collapse mt-2">' +
+    '<div id="tb-weitere-infos-body-' + uid + '" class="collapse mt-2">' +
     links +
     "</div>" +
     "</div></div>"
   );
 }
 
-function renderMethodikbox(configdata) {
+function renderMethodikbox(configdata, uid) {
   const hinweis = String(configdata.datenquelleHinweis || "").trim();
   const stand = String(configdata.datenStand || "").trim();
   if (!hinweis && !stand) return "";
@@ -179,12 +181,12 @@ function renderMethodikbox(configdata) {
   return (
     '<div class="card shadow-sm mt-4"><div class="card-body">' +
     '<button class="tb-toggle btn btn-link text-decoration-none d-flex w-100 justify-content-between align-items-center p-0 collapsed" type="button" ' +
-    'data-bs-toggle="collapse" data-bs-target="#tb-methodik-body" ' +
-    'aria-expanded="false" aria-controls="tb-methodik-body">' +
+    'data-bs-toggle="collapse" data-bs-target="#tb-methodik-body-' + uid + '" ' +
+    'aria-expanded="false" aria-controls="tb-methodik-body-' + uid + '">' +
     '<h5 class="card-title mb-0">Methodik &amp; Datenquelle</h5>' +
     '<span class="tb-chevron" aria-hidden="true">&#9662;</span>' +
     "</button>" +
-    '<div id="tb-methodik-body" class="collapse mt-2">' +
+    '<div id="tb-methodik-body-' + uid + '" class="collapse mt-2">' +
     standZeile +
     hinweis +
     "</div>" +
@@ -193,6 +195,7 @@ function renderMethodikbox(configdata) {
 }
 
 function app(configData, enclosingHtmlDivElement) {
+  const tbUid = "i" + ++tbInstanzZaehler;
   enclosingHtmlDivElement.innerHTML = `<div id="tb-status"></div>
       <div class="table-responsive">
       <table id="tb-phonebook-table" class="table table-striped table-hover">
@@ -207,7 +210,7 @@ function app(configData, enclosingHtmlDivElement) {
         <!-- Dynamische Inhalte werden hier eingefügt -->
         </tbody>
       </table></div>`;
-  loadCSV(configData, enclosingHtmlDivElement);
+  loadCSV(configData, enclosingHtmlDivElement, tbUid);
 }
 
 function setTelefonbuchStatus(root, html) {
@@ -216,7 +219,7 @@ function setTelefonbuchStatus(root, html) {
 }
 
 // Funktion zum Laden der CSV-Dateien aus der API
-async function loadCSV(configData, enclosingHtmlDivElement) {
+async function loadCSV(configData, enclosingHtmlDivElement, uid) {
   const root = enclosingHtmlDivElement;
   try {
     const csvData = await fetchOdasResource(configData.apiurl, configData);
@@ -309,14 +312,14 @@ async function loadCSV(configData, enclosingHtmlDivElement) {
       },
     });
 
-    const methodikHTML = renderMethodikbox(configData);
+    const methodikHTML = renderMethodikbox(configData, uid);
     if (methodikHTML) {
       const methodikEl = document.createElement("div");
       methodikEl.innerHTML = methodikHTML;
       root.appendChild(methodikEl);
     }
 
-    const weitereHTML = renderWeitereInfos(configData);
+    const weitereHTML = renderWeitereInfos(configData, uid);
     if (weitereHTML) {
       const weitereEl = document.createElement("div");
       weitereEl.innerHTML = weitereHTML;
