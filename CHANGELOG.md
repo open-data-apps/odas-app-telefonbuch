@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.16.0 - 2026-08-11
+- FIX: Laufzeitzustand pro App-Instanz isoliert (F-42): Status-, Tabellen- und Body-IDs instanzeindeutig (`tb-status-<uid>`, `tb-phonebook-table-<uid>`, `tb-phonebook-body-<uid>`); `drawCallback` sortiert nur das eigene Wrapper-Element um (`$(settings.nTable).closest(".dataTables_wrapper")` + `.find(...)` statt globaler `$(".dataTables_length")`/`$(".dataTables_paginate")`-Selektoren) — mehrere Instanzen auf einer Seite tauschen ihre Menü-Zeilen nicht mehr
+
 ## 1.15.0 - 2026-08-11
 - FIX: jQuery 3.6.0 und DataTables 1.11.5 lokal vendored (F-36) — die Bibliotheken werden aus `app/vendor/jquery/` bzw. `app/vendor/datatables/` ausgeliefert statt von `code.jquery.com`/`cdn.datatables.net` geladen; keine externen Server fuer Programmbibliotheken beim Aufruf
 

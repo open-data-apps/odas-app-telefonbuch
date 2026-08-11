@@ -196,9 +196,9 @@ function renderMethodikbox(configdata, uid) {
 
 function app(configData, enclosingHtmlDivElement) {
   const tbUid = "i" + ++tbInstanzZaehler;
-  enclosingHtmlDivElement.innerHTML = `<div id="tb-status"></div>
+  enclosingHtmlDivElement.innerHTML = `<div id="tb-status-${tbUid}"></div>
       <div class="table-responsive">
-      <table id="tb-phonebook-table" class="table table-striped table-hover">
+      <table id="tb-phonebook-table-${tbUid}" class="table table-striped table-hover">
         <thead>
           <tr>
             <th>Name</th>
@@ -206,15 +206,15 @@ function app(configData, enclosingHtmlDivElement) {
             <th>Telefonnummer</th>
           </tr>
         </thead>
-        <tbody id="tb-phonebook-body">
+        <tbody id="tb-phonebook-body-${tbUid}">
         <!-- Dynamische Inhalte werden hier eingefügt -->
         </tbody>
       </table></div>`;
   loadCSV(configData, enclosingHtmlDivElement, tbUid);
 }
 
-function setTelefonbuchStatus(root, html) {
-  const status = root && root.querySelector("#tb-status");
+function setTelefonbuchStatus(root, uid, html) {
+  const status = root && root.querySelector("#tb-status-" + uid);
   if (status) status.innerHTML = html || "";
 }
 
@@ -225,7 +225,7 @@ async function loadCSV(configData, enclosingHtmlDivElement, uid) {
     const csvData = await fetchOdasResource(configData.apiurl, configData);
     const rows = parseCsv(csvData);
 
-    const tableBody = root.querySelector("#tb-phonebook-body");
+    const tableBody = root.querySelector("#tb-phonebook-body-" + uid);
     // Kopfzeile überspringen; Zeilen mit zu wenigen Spalten werden gezählt,
     // nicht stillschweigend verworfen.
     const datenzeilen = rows.slice(1);
@@ -264,6 +264,7 @@ async function loadCSV(configData, enclosingHtmlDivElement, uid) {
     if (uebernommen === 0) {
       setTelefonbuchStatus(
         root,
+        uid,
         '<div class="alert alert-info" role="alert">Keine Daten gefunden.</div>',
       );
     } else if (uebersprungen > 0) {
@@ -272,6 +273,7 @@ async function loadCSV(configData, enclosingHtmlDivElement, uid) {
       );
       setTelefonbuchStatus(
         root,
+        uid,
         '<div class="alert alert-warning" role="alert">' +
           escapeHtml(String(uebersprungen)) +
           " Eintrag/Einträge der Datenquelle konnten nicht gelesen werden und fehlen in dieser Liste.</div>",
@@ -279,7 +281,7 @@ async function loadCSV(configData, enclosingHtmlDivElement, uid) {
     }
 
     // DataTable initialisieren
-    $(root.querySelector("#tb-phonebook-table")).DataTable({
+    $(root.querySelector("#tb-phonebook-table-" + uid)).DataTable({
       language: {
         decimal: ",",
         thousands: ".",
@@ -304,8 +306,11 @@ async function loadCSV(configData, enclosingHtmlDivElement, uid) {
       pagingType: "full",
       drawCallback: function (settings) {
         if (window.innerWidth <= 576) {
-          const lengthMenu = $(".dataTables_length");
-          const paginateMenu = $(".dataTables_paginate");
+          // Nur die eigene Instanz umsortieren — kein fremdes DataTables-
+          // Wrapper-Element auf der Seite anfassen (Instanzisolation F-42)
+          const wrapper = $(settings.nTable).closest(".dataTables_wrapper");
+          const lengthMenu = wrapper.find(".dataTables_length");
+          const paginateMenu = wrapper.find(".dataTables_paginate");
 
           lengthMenu.insertAfter(paginateMenu);
         }
@@ -329,10 +334,11 @@ async function loadCSV(configData, enclosingHtmlDivElement, uid) {
     console.error("Fehler beim Laden der CSV-Daten:", error);
     setTelefonbuchStatus(
       root,
+      uid,
       '<div class="alert alert-danger" role="alert">Die Daten konnten nicht geladen werden. ' +
         "Bitte versuchen Sie es später erneut.</div>",
     );
-    const tableBody = root.querySelector("#tb-phonebook-body");
+    const tableBody = root.querySelector("#tb-phonebook-body-" + uid);
     if (tableBody) tableBody.innerHTML = "";
   }
 }
