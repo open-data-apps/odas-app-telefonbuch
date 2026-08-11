@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.15.0 - 2026-08-11
+- FIX: jQuery 3.6.0 und DataTables 1.11.5 lokal vendored (F-36) — die Bibliotheken werden aus `app/vendor/jquery/` bzw. `app/vendor/datatables/` ausgeliefert statt von `code.jquery.com`/`cdn.datatables.net` geladen; keine externen Server fuer Programmbibliotheken beim Aufruf
+
 ## 1.14.0 - 2026-08-07
 - FIX: Bootstrap-Ziele instanzeindeutig machen (F-32): `data-bs-target`, `aria-controls` und die div-IDs der Methodik-Box (`tb-methodik-body`) und der Box „Weitere Informationen" (`tb-weitere-infos-body`) werden pro App-Instanz mit einer UID versehen (`tb-methodik-body-i1`, `-i2`, …), damit mehrere Instanzen der App auf einer Seite nicht kollidieren
 
