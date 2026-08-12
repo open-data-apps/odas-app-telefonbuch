@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.17.0 - 2026-08-12
+- FIX: `app/app.css` wird wieder eingebunden und der dort gerenderte mobile Block wirkt (F-54)
+- FIX: Tote ID-Selektoren `#tb-phonebook-table` auf Klassen-Selektoren umgestellt — die Regeln greifen nach der instanzeindeutigen ID-Umstellung wieder (F-54)
+
 ## 1.16.0 - 2026-08-11
 - FIX: Laufzeitzustand pro App-Instanz isoliert (F-42): Status-, Tabellen- und Body-IDs instanzeindeutig (`tb-status-<uid>`, `tb-phonebook-table-<uid>`, `tb-phonebook-body-<uid>`); `drawCallback` sortiert nur das eigene Wrapper-Element um (`$(settings.nTable).closest(".dataTables_wrapper")` + `.find(...)` statt globaler `$(".dataTables_length")`/`$(".dataTables_paginate")`-Selektoren) — mehrere Instanzen auf einer Seite tauschen ihre Menü-Zeilen nicht mehr
 

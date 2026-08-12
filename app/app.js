@@ -198,7 +198,7 @@ function app(configData, enclosingHtmlDivElement) {
   const tbUid = "i" + ++tbInstanzZaehler;
   enclosingHtmlDivElement.innerHTML = `<div id="tb-status-${tbUid}"></div>
       <div class="table-responsive">
-      <table id="tb-phonebook-table-${tbUid}" class="table table-striped table-hover">
+      <table id="tb-phonebook-table-${tbUid}" class="tb-phonebook-table table table-striped table-hover">
         <thead>
           <tr>
             <th>Name</th>
