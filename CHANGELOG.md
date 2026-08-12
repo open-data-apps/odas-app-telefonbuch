@@ -1,5 +1,9 @@
 # Changelog
 
+
+## 1.18.0 - 2026-08-12
+- FIX: `app/index.html` auf den Template-Stand gebracht; die Vendor-Zeilen aus dem F-36-Fix bleiben in der Reihenfolge jQuery → DataTables → app.js erhalten (F-47)
+
 ## 1.17.0 - 2026-08-12
 - FIX: `app/app.css` wird wieder eingebunden und der dort gerenderte mobile Block wirkt (F-54)
 - FIX: Tote ID-Selektoren `#tb-phonebook-table` auf Klassen-Selektoren umgestellt — die Regeln greifen nach der instanzeindeutigen ID-Umstellung wieder (F-54)
