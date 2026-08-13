@@ -8,6 +8,22 @@
 
 let tbInstanzZaehler = 0;
 
+// Laufzeit-Cleanups pro App-Instanz, je DOM-Container registriert. onPageLeave
+// iteriert alle registrierten Cleanups (try/catch) und leert die Registry
+// anschliessend — die app/app-base.js ruft onPageLeave beim Seitenwechsel auf.
+const tbCleanups = new Map();
+
+function onPageLeave() {
+  tbCleanups.forEach((cleanup) => {
+    try {
+      cleanup();
+    } catch (_err) {
+      // Ein einzelner Cleanup darf den Seitenwechsel nicht blockieren.
+    }
+  });
+  tbCleanups.clear();
+}
+
 function escapeHtml(str) {
   const s = String(str ?? "");
   return s
@@ -196,6 +212,24 @@ function renderMethodikbox(configdata, uid) {
 
 function app(configData, enclosingHtmlDivElement) {
   const tbUid = "i" + ++tbInstanzZaehler;
+
+  // Per-Instanz-Laufzeitzustand: wird synchron vor jeglicher DOM- und
+  // Async-Arbeit angelegt und je Container in tbCleanups registriert. Alle
+  // abzusichernden Ressourcen (hier die DataTable) haengen an diesem Objekt,
+  // damit der Cleanup beim Seitenwechsel genau diese Referenz abraeumen kann
+  // und verspaetete Promise-Fortsetzungen ihren Wurf ins Leere laufen lassen.
+  const runtime = {
+    disposed: false,
+    dataTable: null,
+  };
+  tbCleanups.set(enclosingHtmlDivElement, () => {
+    runtime.disposed = true;
+    if (runtime.dataTable) {
+      runtime.dataTable.destroy();
+      runtime.dataTable = null;
+    }
+  });
+
   enclosingHtmlDivElement.innerHTML = `<div id="tb-status-${tbUid}"></div>
       <div class="table-responsive">
       <table id="tb-phonebook-table-${tbUid}" class="tb-phonebook-table table table-striped table-hover">
@@ -210,7 +244,7 @@ function app(configData, enclosingHtmlDivElement) {
         <!-- Dynamische Inhalte werden hier eingefügt -->
         </tbody>
       </table></div>`;
-  loadCSV(configData, enclosingHtmlDivElement, tbUid);
+  loadCSV(configData, enclosingHtmlDivElement, tbUid, runtime);
 }
 
 function setTelefonbuchStatus(root, uid, html) {
@@ -219,10 +253,15 @@ function setTelefonbuchStatus(root, uid, html) {
 }
 
 // Funktion zum Laden der CSV-Dateien aus der API
-async function loadCSV(configData, enclosingHtmlDivElement, uid) {
+async function loadCSV(configData, enclosingHtmlDivElement, uid, runtime) {
   const root = enclosingHtmlDivElement;
   try {
     const csvData = await fetchOdasResource(configData.apiurl, configData);
+
+    // Seitenwechsel waehrend des Fetch: abbrechen, bevor irgendetwas geparst
+    // oder in den DOM geschrieben wird.
+    if (runtime.disposed) return;
+
     const rows = parseCsv(csvData);
 
     const tableBody = root.querySelector("#tb-phonebook-body-" + uid);
@@ -281,7 +320,8 @@ async function loadCSV(configData, enclosingHtmlDivElement, uid) {
     }
 
     // DataTable initialisieren
-    $(root.querySelector("#tb-phonebook-table-" + uid)).DataTable({
+    if (runtime.disposed) return;
+    runtime.dataTable = $(root.querySelector("#tb-phonebook-table-" + uid)).DataTable({
       language: {
         decimal: ",",
         thousands: ".",
@@ -331,6 +371,8 @@ async function loadCSV(configData, enclosingHtmlDivElement, uid) {
       root.appendChild(weitereEl);
     }
   } catch (error) {
+    // Nach dem Seitenwechsel keine Status-/DOM-Beschreibung mehr schreiben.
+    if (runtime.disposed) return;
     console.error("Fehler beim Laden der CSV-Daten:", error);
     setTelefonbuchStatus(
       root,

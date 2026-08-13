@@ -1,6 +1,9 @@
 # Changelog
 
 
+## 1.19.0 - 2026-08-13
+- FIX: Lifecycle-Cleanup (F-57): je App-Instanz laufzeitgebundene DataTable-Referenz; `onPageLeave` raeumt beim Seitenwechsel die DataTable per `.destroy()` ab und registrierte Cleanups sind pro Container gekapselt; verspaetete CSV-Erfolge/-Fehler nach dem Seitenwechsel bleiben wirkungslos (keine Zeilen, keine DataTable-Initialisierung, keine Karten, kein Status/DOM-Ueberschreiben)
+
 ## 1.18.0 - 2026-08-12
 - FIX: `app/index.html` auf den Template-Stand gebracht; die Vendor-Zeilen aus dem F-36-Fix bleiben in der Reihenfolge jQuery → DataTables → app.js erhalten (F-47)
 
