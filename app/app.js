@@ -253,8 +253,23 @@ function setTelefonbuchStatus(root, uid, html) {
 }
 
 // Funktion zum Laden der CSV-Dateien aus der API
+function isKeineDatenquelleKonfiguriert(targetUrl) {
+  const quelle = String(targetUrl || "").trim();
+  return !quelle || /^\{\{.*\}\}$/.test(quelle) || /^<.*>$/.test(quelle);
+}
+
 async function loadCSV(configData, enclosingHtmlDivElement, uid, runtime) {
   const root = enclosingHtmlDivElement;
+  if (isKeineDatenquelleKonfiguriert(configData.apiurl)) {
+    setTelefonbuchStatus(
+      root,
+      uid,
+      '<div class="alert alert-info" role="alert">Es ist keine Datenquelle konfiguriert.</div>',
+    );
+    const emptyTableBody = root.querySelector("#tb-phonebook-body-" + uid);
+    if (emptyTableBody) emptyTableBody.innerHTML = "";
+    return;
+  }
   try {
     const csvData = await fetchOdasResource(configData.apiurl, configData);
 
