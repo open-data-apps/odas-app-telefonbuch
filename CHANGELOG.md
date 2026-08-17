@@ -1,6 +1,9 @@
 # Changelog
 
 
+## 1.20.0 - 2026-08-17
+- **CHG:** `instanz-config`-`category`-Vokabular auf Deutsch umgestellt (`allgemein`, `beschreibung`, `datenherkunft`, `kontakt-rechtliches`, `sonstiges`); die entfallenen Kategorien `metrics` und `advanced` wurden auf `beschreibung` bzw. `sonstiges` verteilt
+
 ## 1.19.0 - 2026-08-13
 - FIX: Lifecycle-Cleanup (F-57): je App-Instanz laufzeitgebundene DataTable-Referenz; `onPageLeave` raeumt beim Seitenwechsel die DataTable per `.destroy()` ab und registrierte Cleanups sind pro Container gekapselt; verspaetete CSV-Erfolge/-Fehler nach dem Seitenwechsel bleiben wirkungslos (keine Zeilen, keine DataTable-Initialisierung, keine Karten, kein Status/DOM-Ueberschreiben)
 
