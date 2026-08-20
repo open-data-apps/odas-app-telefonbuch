@@ -1,6 +1,9 @@
 # Changelog
 
 
+## 1.23.0 - 2026-08-20
+- FIX: Eigenimplementierter CSV-Parser (byte-identisch mit dem in `odas-app-poi` dupliziert) durch vendorte PapaParse ersetzt (F-72)
+
 ## 1.22.0 - 2026-08-17
 - `urlDaten.default` nutzte keinen Auto-Fill-Platzhalter, obwohl `apiurl.default` bereits `{{appconfig.datensatz-apiurl}}` verwendet; jetzt mit dem fehlenden Gegenstück `{{appconfig.datensatz-url}}` (Muster: `odas-app-parkflaechen`/`odas-app-poi`), `beispiel` auf die bereits verifizierte Datensatzseite gesetzt (F-68)
 

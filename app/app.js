@@ -132,59 +132,46 @@ function describeNonJsonPayload(rawContent) {
 
 // ── CSV-PARSING ──────────────────────────────────────────────────────────────
 // Kommunale Open-Data-CSVs sind häufig Semikolon-getrennt, enthalten gequotete
-// Felder und CRLF-Zeilenenden. Naives split(",") verwirft solche Zeilen still.
+// Felder und CRLF-Zeilenenden. PapaParse (vendort, RFC 4180, Delimiter-Auto-
+// Detect) übernimmt das robuste Parsen. Unten wird weiterhin positional
+// (Name/Stelle/Telefonnummer per Spaltenindex) zugegriffen, daher bleibt die
+// Ausgabeform Array-of-Arrays inkl. Kopfzeile (header: false) — wie beim
+// vorherigen Eigenparser, der ebenfalls rows[0] als Kopfzeile auslieferte.
 
-function detectCsvDelimiter(text) {
-  const firstLine = String(text).split(/\r\n|\r|\n/)[0] || "";
-  let best = ",";
-  let bestCount = 0;
-  [";", ",", "\t", "|"].forEach((cand) => {
-    let count = 0;
-    let inQuotes = false;
-    for (let i = 0; i < firstLine.length; i++) {
-      const c = firstLine[i];
-      if (c === '"') inQuotes = !inQuotes;
-      else if (c === cand && !inQuotes) count++;
+// PapaParse (CSV-Parsing) dynamisch aus app/vendor laden; Promise-basiert.
+function ensurePapaparse() {
+  return new Promise((resolve, reject) => {
+    if (window.Papa) {
+      resolve();
+      return;
     }
-    if (count > bestCount) {
-      bestCount = count;
-      best = cand;
+    const vorhanden = document.getElementById("papaparse-script");
+    if (vorhanden) {
+      vorhanden.addEventListener("load", () => resolve());
+      vorhanden.addEventListener("error", () =>
+        reject(new Error("PapaParse konnte nicht geladen werden.")),
+      );
+      return;
     }
+    const script = document.createElement("script");
+    script.id = "papaparse-script";
+    script.src = "vendor/papaparse/papaparse.min.js";
+    script.onload = () => resolve();
+    script.onerror = () =>
+      reject(new Error("PapaParse konnte nicht geladen werden."));
+    document.head.appendChild(script);
   });
-  return best;
 }
 
-function parseCsv(text, delimiter) {
-  const sep = delimiter || detectCsvDelimiter(text);
-  const rows = [];
-  let row = [];
-  let field = "";
-  let inQuotes = false;
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
-    if (inQuotes) {
-      if (c === '"' && text[i + 1] === '"') {
-        field += '"';
-        i++;
-      } else if (c === '"') inQuotes = false;
-      else field += c;
-    } else if (c === '"') inQuotes = true;
-    else if (c === sep) {
-      row.push(field);
-      field = "";
-    } else if (c === "\n" || c === "\r") {
-      if (c === "\r" && text[i + 1] === "\n") i++;
-      row.push(field);
-      field = "";
-      if (row.length > 1 || row[0] !== "") rows.push(row);
-      row = [];
-    } else field += c;
+function parseCsv(text) {
+  const result = Papa.parse(String(text), {
+    header: false,
+    skipEmptyLines: "greedy",
+  });
+  if (result.errors && result.errors.length > 0) {
+    console.warn("Telefonbuch: CSV-Parsing-Warnungen:", result.errors);
   }
-  if (field !== "" || row.length) {
-    row.push(field);
-    rows.push(row);
-  }
-  return rows;
+  return result.data;
 }
 
 function renderWeitereInfos(configdata, uid) {
@@ -293,6 +280,9 @@ async function loadCSV(configData, enclosingHtmlDivElement, uid, runtime) {
 
     // Seitenwechsel waehrend des Fetch: abbrechen, bevor irgendetwas geparst
     // oder in den DOM geschrieben wird.
+    if (runtime.disposed) return;
+
+    await ensurePapaparse();
     if (runtime.disposed) return;
 
     const rows = parseCsv(csvData);
