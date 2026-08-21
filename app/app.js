@@ -108,6 +108,17 @@ async function fetchOdasResource(targetUrl, configdata = {}) {
   }
 }
 
+/**
+ * Löst eine benannte Datenressource aus configdata.apiurls auf.
+ * Neue apiurls-Form (typ: "array"); das frühere skalare apiurl wird nicht mehr gelesen.
+ * @returns {string} getrimmte URL, oder "" für den Zustand "keine Quelle konfiguriert"
+ */
+function getOdasApiUrl(configdata, name) {
+  const liste = Array.isArray(configdata && configdata.apiurls) ? configdata.apiurls : [];
+  const treffer = liste.find((eintrag) => eintrag && eintrag.name === name);
+  return String((treffer && treffer.url) || "").trim();
+}
+
 async function fetchOdasJson(targetUrl, configdata = {}) {
   const rawContent = await fetchOdasResource(targetUrl, configdata);
   try {
@@ -265,7 +276,7 @@ function isKeineDatenquelleKonfiguriert(targetUrl) {
 
 async function loadCSV(configData, enclosingHtmlDivElement, uid, runtime) {
   const root = enclosingHtmlDivElement;
-  if (isKeineDatenquelleKonfiguriert(configData.apiurl)) {
+  if (isKeineDatenquelleKonfiguriert(getOdasApiUrl(configData, "telefonbuch"))) {
     setTelefonbuchStatus(
       root,
       uid,
@@ -276,7 +287,7 @@ async function loadCSV(configData, enclosingHtmlDivElement, uid, runtime) {
     return;
   }
   try {
-    const csvData = await fetchOdasResource(configData.apiurl, configData);
+    const csvData = await fetchOdasResource(getOdasApiUrl(configData, "telefonbuch"), configData);
 
     // Seitenwechsel waehrend des Fetch: abbrechen, bevor irgendetwas geparst
     // oder in den DOM geschrieben wird.

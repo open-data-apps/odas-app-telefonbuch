@@ -1,5 +1,7 @@
 # Changelog
 
+## 1.25.0 - 2026-08-21
+- **CHG:** Skalares `apiurl` durch das Array-Feld `apiurls` ersetzt (`typ: "array"`, Eintrag `telefonbuch`). Neuer Standard portfolioweit; `apiurl` entfällt. `app.js` liest die Datenquelle jetzt über `getOdasApiUrl(configdata, "telefonbuch")`.
 
 ## 1.24.0 - 2026-08-20
 - Markdown-Metadaten: Paketbeschreibungen auf echtes Markdown umgestellt, exakte Identität Top-Level/Instanz hergestellt, lokale HTML-Fixture semantisch gespiegelt.

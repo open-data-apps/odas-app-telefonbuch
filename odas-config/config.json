@@ -9,7 +9,7 @@
     "<p>Die Telefonbuch-App macht Kontakt- und Zuständigkeitsdaten aus einer konfigurierten CSV-Ressource schnell durchsuchbar – mit Volltextsuche, Sortierung und direkten Telefon-Links.</p>",
     "<p>Sie richtet sich an Bürger:innen, Verwaltungen, Organisationen und Service-Teams, die Ansprechpersonen leicht auffindbar machen möchten. Besondere Datenkenntnisse sind für die Nutzung nicht erforderlich.</p>",
     "<h2>Methodik</h2>",
-    "<p>Die App lädt die in <code>apiurl</code> konfigurierte CSV-Datei direkt im Browser – im Live-Betrieb optional über den ODAS-Proxy (<code>proxyAktiv</code>: <code>nein</code> = direkt, <code>ja</code> = über <code>/odp-data?path=...</code>) – und verarbeitet sie ausschließlich im Browser ohne eigene Persistenz.</p>",
+    "<p>Die App lädt die in <code>apiurls.telefonbuch</code> konfigurierte CSV-Datei direkt im Browser – im Live-Betrieb optional über den ODAS-Proxy (<code>proxyAktiv</code>: <code>nein</code> = direkt, <code>ja</code> = über <code>/odp-data?path=...</code>) – und verarbeitet sie ausschließlich im Browser ohne eigene Persistenz.</p>",
     "<p>Der CSV-Text wird mit der lokal ausgelieferten Bibliothek PapaParse (<code>app/vendor/papaparse/papaparse.min.js</code>) geparst; die erste Zeile wird als Kopfzeile übersprungen und die folgenden Zeilen werden positional ausgewertet: Spalte 1 <code>Name</code>, Spalte 2 <code>Stelle</code>, Spalte 3 <code>Telefonnummer</code>. Zeilen mit weniger als drei Spalten oder leerem <code>Name</code> werden nicht angezeigt, gezählt und als Warnung (<code>X Einträge konnten nicht gelesen werden</code>) sichtbar gemacht.</p>",
     "<p>Die Tabelle wird mit DataTables (<code>app/vendor/datatables/</code>, jQuery <code>app/vendor/jquery/</code>) gerendert und bietet Volltextsuche über alle Spalten, Klick-Sortierung je Spalte und clientseitige Pagination. Telefonnummern werden als <code>tel:</code>-Links gerendert und sind direkt wählbar. Die App bietet bewusst keine Gruppierung, keine zusätzlichen E-Mail-/Kontaktfelder, keine Detailansicht, kein Modal, keine KPIs, kein Diagramm, keinen Download und kein Polling.</p>",
     "<p>Der Datenstand (<code>datenStand</code>) ist ein konfigurierbarer Freitext (z. B. <code>Stand: Januar 2025</code>); die App wertet keinen HTTP-<code>Last-Modified</code>-Header aus. Als Datenquelle wird ausschließlich CSV unterstützt – eine JSON-Quelle wird nicht unterstützt.</p>",
@@ -32,7 +32,13 @@
   ],
   "urlDaten": "https://open-data-musterstadt.ckan.de/dataset/4b5752b1-1d68-4ae7-9be5-4a0f2f362092",
   "fusszeile": "(C) Copyright 2025 | Inhalt: Stadt Esslingen | App: Ondics GmbH | Provided by: Ondics GmbH",
-  "apiurl": "https://open-data-musterstadt.ckan.de/dataset/4b5752b1-1d68-4ae7-9be5-4a0f2f362092/resource/4f30dd36-bf63-4ab5-b2e5-b09fe0c55900/download/telefonbuch-musterstadt.csv",
+  "apiurls": [
+    {
+      "name": "telefonbuch",
+      "label": "Daten URL",
+      "url": "https://open-data-musterstadt.ckan.de/dataset/4b5752b1-1d68-4ae7-9be5-4a0f2f362092/resource/4f30dd36-bf63-4ab5-b2e5-b09fe0c55900/download/telefonbuch-musterstadt.csv"
+    }
+  ],
   "sprache": "de",
   "datenStand": "Stand: abhängig von der konfigurierten Telefonbuch-Ressource",
   "weiterfuehrendeLinks": "<ul><li><a href=\"{{odp.url}}\" target=\"_blank\" rel=\"noopener\">{{odp.name}}</a></li><li><a href=\"{{appconfig.datensatz-apiurl}}\" target=\"_blank\" rel=\"noopener\">Konfigurierte Telefonbuch-Ressource</a></li><li><a href=\"https://open-data-app-store.de\" target=\"_blank\" rel=\"noopener\">Open Data App Store</a></li></ul>",

@@ -3,7 +3,7 @@
   "app-entwickler-name": "ondics-gmbh",
   "name-in-url": "telefonbuch",
   "name": "Telefonbuch",
-  "version": "1.24.0",
+  "version": "1.25.0",
   "odas-app-icon": "assets/odas-app-icon.svg",
   "app-icon": "assets/odas-app-icon.svg",
   "kurzbeschreibung": "Schnell die richtige Ansprechperson finden: Diese App listet alle Kontaktdaten – durchsuchbar und klickbereit.",
@@ -15,7 +15,7 @@
     "",
     "## Methodik",
     "",
-    "Die App lädt die in `apiurl` konfigurierte CSV-Datei direkt im Browser – im Live-Betrieb optional über den ODAS-Proxy (`proxyAktiv`: `nein` = direkt, `ja` = über `/odp-data?path=...`) – und verarbeitet sie ausschließlich im Browser ohne eigene Persistenz.",
+    "Die App lädt die in `apiurls.telefonbuch` konfigurierte CSV-Datei direkt im Browser – im Live-Betrieb optional über den ODAS-Proxy (`proxyAktiv`: `nein` = direkt, `ja` = über `/odp-data?path=...`) – und verarbeitet sie ausschließlich im Browser ohne eigene Persistenz.",
     "",
     "Der CSV-Text wird mit der lokal ausgelieferten Bibliothek PapaParse (`app/vendor/papaparse/papaparse.min.js`) geparst; die erste Zeile wird als Kopfzeile übersprungen und die folgenden Zeilen werden positional ausgewertet: Spalte 1 `Name`, Spalte 2 `Stelle`, Spalte 3 `Telefonnummer`. Zeilen mit weniger als drei Spalten oder leerem `Name` werden nicht angezeigt, gezählt und als Warnung (`X Einträge konnten nicht gelesen werden`) sichtbar gemacht.",
     "",
@@ -128,7 +128,7 @@
         "",
         "## Methodik",
         "",
-        "Die App lädt die in `apiurl` konfigurierte CSV-Datei direkt im Browser – im Live-Betrieb optional über den ODAS-Proxy (`proxyAktiv`: `nein` = direkt, `ja` = über `/odp-data?path=...`) – und verarbeitet sie ausschließlich im Browser ohne eigene Persistenz.",
+        "Die App lädt die in `apiurls.telefonbuch` konfigurierte CSV-Datei direkt im Browser – im Live-Betrieb optional über den ODAS-Proxy (`proxyAktiv`: `nein` = direkt, `ja` = über `/odp-data?path=...`) – und verarbeitet sie ausschließlich im Browser ohne eigene Persistenz.",
         "",
         "Der CSV-Text wird mit der lokal ausgelieferten Bibliothek PapaParse (`app/vendor/papaparse/papaparse.min.js`) geparst; die erste Zeile wird als Kopfzeile übersprungen und die folgenden Zeilen werden positional ausgewertet: Spalte 1 `Name`, Spalte 2 `Stelle`, Spalte 3 `Telefonnummer`. Zeilen mit weniger als drei Spalten oder leerem `Name` werden nicht angezeigt, gezählt und als Warnung (`X Einträge konnten nicht gelesen werden`) sichtbar gemacht.",
         "",
@@ -233,17 +233,24 @@
       },
       "erforderlich": "ja"
     },
-    "apiurl": {
-      "label": "Daten URL",
+    "apiurls": {
+      "label": "URLs zu Datenressourcen",
       "category": "datenherkunft",
-      "hilfe": "Die Daten URL muss auf die CSV Datei im Open Data Portal zeigen",
+      "hilfe": "Direkter Download-, Datei- oder API-Endpunkt der tatsächlich verwendeten Datenquelle(n). Mehrere Einträge möglich.",
+      "typ": "array",
       "format": {
         "typ": "url",
-        "laenge": 255
+        "laenge": 500
       },
-      "default": "{{appconfig.datensatz-apiurl}}",
-      "beispiel": "https://open-data-musterstadt.ckan.de/dataset/4b5752b1-1d68-4ae7-9be5-4a0f2f362092/resource/4f30dd36-bf63-4ab5-b2e5-b09fe0c55900/download/telefonbuch-musterstadt.csv",
-      "erforderlich": "ja"
+      "urls": [
+        {
+          "name": "telefonbuch",
+          "label": "Daten URL",
+          "default": "{{appconfig.datensatz-apiurl}}",
+          "beispiel": "https://open-data-musterstadt.ckan.de/dataset/4b5752b1-1d68-4ae7-9be5-4a0f2f362092/resource/4f30dd36-bf63-4ab5-b2e5-b09fe0c55900/download/telefonbuch-musterstadt.csv",
+          "erforderlich": "ja"
+        }
+      ]
     },
     "sprache": {
       "label": "Sprache der App",
