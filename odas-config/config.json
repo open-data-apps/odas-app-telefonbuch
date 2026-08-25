@@ -17,7 +17,7 @@
     "<p>Bei <code>proxyAktiv: nein</code> muss die Datenquelle CORS freigeben; ohne Freigabe schlägt der direkte Abruf fehl und die Tabelle bleibt leer mit Fehlermeldung. Mit <code>proxyAktiv: ja</code> läuft der Abruf über den ODAS-Proxy (nur im ODAS-Live-System verfügbar).</p>",
     "<h2>Datenquelle</h2>",
     "<p>Die Kontaktdaten werden als CSV-Datei über das Open-Data-Portal bereitgestellt; die konkrete Quelle wird über die App-Konfiguration festgelegt.</p>",
-    "<ul><li><strong>Open Data Portal:</strong> <a href=\"{{odp.url}}\" target=\"_blank\" rel=\"noopener\">{{odp.name}}</a></li><li><strong>Datensatz:</strong> <a href=\"{{appconfig.datensatz-url}}\" target=\"_blank\" rel=\"noopener\">Datensatz ansehen</a></li><li><strong>Ressource/API-Endpunkt:</strong> <a href=\"{{appconfig.datensatz-apiurl}}\" target=\"_blank\" rel=\"noopener\">Konfigurierte Telefonbuch-Ressource</a> – CSV-Datei, eine Kopfzeile, Trennzeichen <code>;</code> oder <code>,</code> (auto-erkannt)</li></ul>",
+    "<ul><li><strong>Open Data Portal:</strong> <a href=\"{{odp.url}}\" target=\"_blank\" rel=\"noopener\">{{odp.name}}</a></li><li><strong>Datensatz:</strong> <a href=\"https://open-data-musterstadt.ckan.de/dataset/4b5752b1-1d68-4ae7-9be5-4a0f2f362092\" target=\"_blank\" rel=\"noopener\">Datensatz ansehen</a></li><li><strong>Ressource/API-Endpunkt:</strong> <a href=\"{{{appinstanz.apiurls.1}}}\" target=\"_blank\" rel=\"noopener\">Konfigurierte Telefonbuch-Ressource</a> – CSV-Datei, eine Kopfzeile, Trennzeichen <code>;</code> oder <code>,</code> (auto-erkannt)</li></ul>",
     "<p>Angezeigt werden die in der Quelle vorhandenen Kontakte; Verfügbarkeit und Aktualität hängen vom Pflegestand der Quelle ab.</p>",
     "<h2>Open Data App</h2>",
     "<p>Diese App ist eine Open Data App und kann im <a href=\"https://open-data-app-store.de/\" target=\"_blank\" rel=\"noopener\">Open Data App Store</a> betrieben werden. Sie ist Open Source und lässt sich mit Kontakt- oder Telefonbuchdaten anderer Organisationen konfigurieren.</p>",
@@ -41,6 +41,6 @@
   ],
   "sprache": "de",
   "datenStand": "Stand: abhängig von der konfigurierten Telefonbuch-Ressource",
-  "weiterfuehrendeLinks": "<ul><li><a href=\"{{odp.url}}\" target=\"_blank\" rel=\"noopener\">{{odp.name}}</a></li><li><a href=\"{{appconfig.datensatz-apiurl}}\" target=\"_blank\" rel=\"noopener\">Konfigurierte Telefonbuch-Ressource</a></li><li><a href=\"https://open-data-app-store.de\" target=\"_blank\" rel=\"noopener\">Open Data App Store</a></li></ul>",
+  "weiterfuehrendeLinks": "<ul><li><a href=\"{{odp.url}}\" target=\"_blank\" rel=\"noopener\">{{odp.name}}</a></li><li><a href=\"{{{appinstanz.apiurls.1}}}\" target=\"_blank\" rel=\"noopener\">Konfigurierte Telefonbuch-Ressource</a></li><li><a href=\"https://open-data-app-store.de\" target=\"_blank\" rel=\"noopener\">Open Data App Store</a></li></ul>",
   "datenquelleHinweis": "<p>Die Telefonbuch-App lädt tabellarische Kontaktdaten aus der konfigurierten CSV-Ressource und macht sie durchsuchbar. Namen, Stellen und Telefonnummern werden aus der Quelle übernommen; Aktualität und Vollständigkeit hängen von der Pflege des Datensatzes ab.</p>"
 }
