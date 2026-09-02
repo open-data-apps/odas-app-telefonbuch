@@ -224,7 +224,7 @@
     "proxyAktiv": {
       "label": "ODAS-Proxy aktivieren",
       "category": "datenherkunft",
-      "hilfe": "Mit ja werden Datenabrufe über den ODAS-Proxy gesendet. Der Proxy ist nur im ODAS-Live-System verfügbar; Entwicklung und Standalone verwenden nein.",
+      "hilfe": "Mit ja läuft der Datenabruf über den ODAS-Proxy /odp-data (nur im ODAS-Live-System, nur freigegebene Quellen – Origin-Allowlist). Mit nein direkt im Browser (braucht CORS der Quelle). Lokal immer nein testen.",
       "default": "nein",
       "format": {
         "typ": "dropdown",
@@ -238,7 +238,7 @@
     "apiurls": {
       "label": "URLs zu Datenressourcen",
       "category": "datenherkunft",
-      "hilfe": "Direkter Download-, Datei- oder API-Endpunkt der tatsächlich verwendeten Datenquelle(n). Mehrere Einträge möglich.",
+      "hilfe": "Diese App benötigt einen „Datei-Download“ (direkter Link auf eine Datei im Portal, z. B. CSV/JSON). Öffnen Sie die Datei und kopieren Sie den „Download“-Link. Kein API-Link mit „resource_id“. Beispiel: https://open-data-musterstadt.ckan.de/dataset/4b5752b1-1d68-4ae7-9be5-4a0f2f362092/resource/4b5752b1-1d68-4ae7-9be5-4a0f2f362092/download/telefonbuch.csv. Diese App funktioniert nur mit diesem Typ.",
       "typ": "array",
       "format": {
         "typ": "url",
@@ -247,7 +247,7 @@
       "urls": [
         {
           "name": "telefonbuch",
-          "label": "Daten URL",
+          "label": "Datei-Download – Telefonbuch (CSV)",
           "default": "https://open-data-musterstadt.ckan.de/dataset/4b5752b1-1d68-4ae7-9be5-4a0f2f362092/resource/4f30dd36-bf63-4ab5-b2e5-b09fe0c55900/download/telefonbuch-musterstadt.csv",
           "beispiel": "https://open-data-musterstadt.ckan.de/dataset/4b5752b1-1d68-4ae7-9be5-4a0f2f362092/resource/4f30dd36-bf63-4ab5-b2e5-b09fe0c55900/download/telefonbuch-musterstadt.csv",
           "erforderlich": "ja"
@@ -270,7 +270,7 @@
     "urlDaten": {
       "label": "URL zum Datensatz im ODP",
       "category": "datenherkunft",
-      "hilfe": "Der Datensatz im Open Data Portal mit den Daten der Telefonbuch App",
+      "hilfe": "Link zur Beschreibungsseite des Datensatzes im Open-Data-Portal (…/dataset/… oder Portal-Start) – nicht der API-Endpunkt. Wird in der App unter „Über diese App → Datenquelle“ verlinkt.",
       "format": {
         "typ": "url"
       },
@@ -292,7 +292,7 @@
     "weiterfuehrendeLinks": {
       "label": "Weiterführende Links",
       "category": "beschreibung",
-      "hilfe": "Verwandte Datensätze / Hintergrundquellen (Markdown/HTML). Leer = ausgeblendet.",
+      "hilfe": "Links zu verwandten Datensätzen/Hintergrundquellen (Markdown/HTML). Leer = Abschnitt ausgeblendet.",
       "format": {
         "typ": "markdown"
       },
@@ -302,7 +302,7 @@
     "datenquelleHinweis": {
       "label": "Methodik / Datenquelle-Hinweis",
       "category": "beschreibung",
-      "hilfe": "Herkunft, Erhebungsmethode und Limitierungen (HTML/Markdown). Leer = ausgeblendet.",
+      "hilfe": "Herkunft, Erhebungsmethode, Zeitbezug und Limitierungen (Markdown/HTML). Leer = Hinweis-Box ausgeblendet. Beispiel: „Erhebung: Stadt Dortmund, Methode: Melderegister, Stand: 2024, Limit: nur freigegebene Daten“.",
       "format": {
         "typ": "markdown"
       },
