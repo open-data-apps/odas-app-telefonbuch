@@ -1,16 +1,34 @@
 {
+  "$schema": "https://frictionlessdata.io/schemas/table-schema.json",
+  "name": "odas-app-telefonbuch",
+  "title": "Telefonbuch",
   "fields": [
     {
       "name": "Name",
-      "type": "string"
+      "title": "Name",
+      "type": "string",
+      "description": "Name des Eintrags.",
+      "constraints": {
+        "required": false
+      }
     },
     {
       "name": "Position",
-      "type": "string"
+      "title": "Position",
+      "type": "string",
+      "description": "Funktion oder Stelle des Eintrags.",
+      "constraints": {
+        "required": false
+      }
     },
     {
       "name": "Telefonnummer",
-      "type": "string"
+      "title": "Telefonnummer",
+      "type": "string",
+      "description": "Telefonnummer als Text (Format mit Vorwahl/Sonderzeichen bleibt erhalten).",
+      "constraints": {
+        "required": false
+      }
     }
   ]
 }
