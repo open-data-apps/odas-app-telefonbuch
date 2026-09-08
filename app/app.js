@@ -429,12 +429,27 @@ function isKeineDatenquelleKonfiguriert(targetUrl) {
 
 async function loadCSV(configData, enclosingHtmlDivElement, uid, runtime) {
   const root = enclosingHtmlDivElement;
-  if (isKeineDatenquelleKonfiguriert(getOdasApiUrl(configData, "telefonbuch"))) {
-    setTelefonbuchStatus(
-      root,
-      uid,
-      '<div class="alert alert-info" role="alert">Es ist keine Datenquelle konfiguriert.</div>',
-    );
+  const tbQuelle = getOdasApiUrl(configData, "telefonbuch");
+  if (isKeineDatenquelleKonfiguriert(tbQuelle)) {
+    renderOdasFehler(root, new Error("Keine Datenquelle konfiguriert."), {
+      url: tbQuelle,
+      label: "Telefonbuch-CSV",
+      typLabel: "Datei-Download",
+      erwarteterTyp: "ckan-dl",
+    });
+    const emptyTableBody = root.querySelector("#tb-phonebook-body-" + uid);
+    if (emptyTableBody) emptyTableBody.innerHTML = "";
+    return;
+  }
+  // Variante A (F-92): Typprüfung vor dem ersten Fetch.
+  const tbTypWarn = validateUrlTypErwartung(tbQuelle, "ckan-dl");
+  if (tbTypWarn) {
+    renderOdasFehler(root, new Error(tbTypWarn), {
+      url: tbQuelle,
+      label: "Telefonbuch-CSV",
+      typLabel: "Datei-Download",
+      erwarteterTyp: "ckan-dl",
+    });
     const emptyTableBody = root.querySelector("#tb-phonebook-body-" + uid);
     if (emptyTableBody) emptyTableBody.innerHTML = "";
     return;
@@ -561,12 +576,12 @@ async function loadCSV(configData, enclosingHtmlDivElement, uid, runtime) {
     // Nach dem Seitenwechsel keine Status-/DOM-Beschreibung mehr schreiben.
     if (runtime.disposed) return;
     console.error("Fehler beim Laden der CSV-Daten:", error);
-    setTelefonbuchStatus(
-      root,
-      uid,
-      '<div class="alert alert-danger" role="alert">Die Daten konnten nicht geladen werden. ' +
-        "Bitte versuchen Sie es später erneut.</div>",
-    );
+    renderOdasFehler(root, error, {
+      url: getOdasApiUrl(configData, "telefonbuch"),
+      label: "Telefonbuch-CSV",
+      typLabel: "Datei-Download",
+      erwarteterTyp: "ckan-dl",
+    });
     const tableBody = root.querySelector("#tb-phonebook-body-" + uid);
     if (tableBody) tableBody.innerHTML = "";
   }
