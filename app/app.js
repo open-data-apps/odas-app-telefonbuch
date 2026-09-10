@@ -38,6 +38,9 @@ function isOdasProxyEnabled(configdata = {}) {
   return String(configdata.proxyAktiv || "").trim().toLowerCase() === "ja";
 }
 
+// Kanonischer Portfolio-Helper (helpercheck-Vertrag: Anwesenheit + Verhalten).
+// Wird app-intern nicht direkt aufgerufen, bleibt aber Bestandteil der
+// Proxy-Helfer-Familie.
 function extractPathFromUrl(url) {
   try {
     const parsedUrl = new URL(url);
@@ -150,6 +153,232 @@ function describeNonJsonPayload(rawContent) {
   const firstLine = text.split(/\r?\n/, 1)[0];
   if (/[,;]/.test(firstLine)) return "eine CSV- oder Textdatei";
   return "unlesbaren Inhalt";
+}
+
+// ── DYNAMISCHE VENDOR-LOADER ───────────────────────────────────────────────
+// jQuery + DataTables kommen aus app/vendor/ und werden erst bei Bedarf
+// geladen — keine statischen Bibliotheks-Tags in app/index.html
+// (Template-Konformität). data-fertig markiert abgeschlossene Ladevorgänge,
+// damit nebenläufige Instanzen denselben Script-Tag mitbenutzen können.
+function ladeVendorSkript(id, src) {
+  return new Promise((resolve, reject) => {
+    const fehler = () => reject(new Error("Bibliothek konnte nicht geladen werden: " + src));
+    const vorhanden = document.getElementById(id);
+    if (vorhanden) {
+      if (vorhanden.dataset && vorhanden.dataset.fertig === "1") {
+        resolve();
+        return;
+      }
+      vorhanden.addEventListener("load", () => resolve());
+      vorhanden.addEventListener("error", fehler);
+      return;
+    }
+    const script = document.createElement("script");
+    script.id = id;
+    script.src = src;
+    script.onload = () => {
+      script.dataset.fertig = "1";
+      resolve();
+    };
+    script.onerror = fehler;
+    document.head.appendChild(script);
+  });
+}
+
+function tbLadeDatatablesPlugin() {
+  return ladeVendorSkript("tb-datatables-script", "vendor/datatables/jquery.dataTables.min.js").then(() => {
+    const jq = window.jQuery || window.$;
+    if (!jq || !jq.fn || !jq.fn.DataTable) {
+      throw new Error("DataTables konnte nicht geladen werden.");
+    }
+    if (!document.getElementById("tb-datatables-css")) {
+      const link = document.createElement("link");
+      link.id = "tb-datatables-css";
+      link.rel = "stylesheet";
+      link.href = "vendor/datatables/jquery.dataTables.min.css";
+      document.head.appendChild(link);
+    }
+  });
+}
+
+function ensureJqueryDataTables() {
+  const jq = window.jQuery || window.$;
+  if (typeof jq !== "function") {
+    // Kein jQuery vorhanden (Normalfall nach Entfernung der statischen Tags):
+    // volle Kette aus app/vendor/ laden.
+    return ladeVendorSkript("tb-jquery-script", "vendor/jquery/jquery.min.js")
+      .then(() => {
+        if (typeof window.jQuery !== "function" && typeof window.$ !== "function") {
+          throw new Error("jQuery konnte nicht geladen werden.");
+        }
+        return tbLadeDatatablesPlugin();
+      });
+  }
+  if (jq.fn && !jq.fn.DataTable) {
+    // Echtes Host-jQuery ohne Plugin (z. B. ODAS-Store) — nur Plugin nachladen.
+    return tbLadeDatatablesPlugin();
+  }
+  // Bereits vollständig (dynamisch geladen) oder Test-Stub ohne .fn — der
+  // nachfolgende $(...).DataTable(...)-Aufruf entscheidet.
+  return Promise.resolve();
+}
+
+// ── DATENNORMALISIERUNG (CSV + JSON, Header-Mapping) ───────────────────────
+// Spalten werden per Kopfzeilennamen zugeordnet (exakter Treffer,
+// kleingeschrieben); positional 0/1/2 ist nur Fallback für kopflose Dateien.
+const TB_ALIAS_NAME = ["name", "kontakt", "person", "mitarbeiter", "ansprechpartner", "contact", "fullname", "full name", "displayname", "display name"];
+const TB_ALIAS_VORNAME = ["vorname", "first name", "firstname", "given name"];
+const TB_ALIAS_NACHNAME = ["nachname", "last name", "lastname", "family name", "surname"];
+const TB_ALIAS_STELLE = ["stelle", "position", "funktion", "abteilung", "department", "division", "bereich", "amt", "referat", "rolle", "team", "office", "unit"];
+const TB_ALIAS_TELEFON = ["telefon", "telefonnummer", "tel", "phone", "telephone", "mobile", "cell", "rufnummer", "durchwahl", "nummer", "handy", "phone number", "phonenumber"];
+
+function tbFindeSpaltenIndex(kopf, aliase, fallback) {
+  const normiert = (kopf || []).map((h) => String(h == null ? "" : h).trim().toLowerCase());
+  for (const alias of aliase) {
+    const idx = normiert.indexOf(alias);
+    if (idx >= 0) return idx;
+  }
+  return fallback;
+}
+
+function tbLeseJsonFeld(objekt, aliase) {
+  if (!objekt || typeof objekt !== "object") return "";
+  const schluessel = Object.create(null);
+  Object.keys(objekt).forEach((k) => {
+    schluessel[String(k).trim().toLowerCase()] = k;
+  });
+  for (const alias of aliase) {
+    if (schluessel[alias] !== undefined) {
+      const wert = objekt[schluessel[alias]];
+      return String(wert == null ? "" : wert).trim();
+    }
+  }
+  return "";
+}
+
+function tbNormalisiereJsonEintrag(eintrag) {
+  if (!eintrag || typeof eintrag !== "object") return null;
+  let name = tbLeseJsonFeld(eintrag, TB_ALIAS_NAME);
+  if (!name) {
+    // Getrennte Vor-/Nachname-Felder zu „Vorname Nachname" kombinieren.
+    name = [tbLeseJsonFeld(eintrag, TB_ALIAS_VORNAME), tbLeseJsonFeld(eintrag, TB_ALIAS_NACHNAME)]
+      .filter(Boolean)
+      .join(" ");
+  }
+  if (!name) return null;
+  return {
+    name,
+    stelle: tbLeseJsonFeld(eintrag, TB_ALIAS_STELLE),
+    telefon: tbLeseJsonFeld(eintrag, TB_ALIAS_TELEFON),
+  };
+}
+
+// Eine Spalte lesen: Treffer per Kopfzeile, sonst positional nur wenn gar kein
+// Kopfalias gegriffen hat (kopflose Datei, altes Verhalten 0/1/2).
+function tbHoleSpalte(colsArr, idx, fallbackIdx, hatKopf) {
+  if (idx >= 0) return String(colsArr[idx] == null ? "" : colsArr[idx]).trim();
+  if (!hatKopf && fallbackIdx >= 0) {
+    return String(colsArr[fallbackIdx] == null ? "" : colsArr[fallbackIdx]).trim();
+  }
+  return "";
+}
+
+// Liefert { kopf, eintraege }: JSON-Arrays (Objekte) und CSV-Texte werden auf
+// dieselbe Eintragsform { name, stelle, telefon } abgebildet. Ungeparstes
+// fällt auf CSV zurück (nicht umgekehrt), damit kein valider CSV-Text als
+// kaputtes JSON fehlschlägt.
+function tbNormalisiereDatensaetze(rohtext) {
+  const text = String(rohtext == null ? "" : rohtext);
+  const getrimmt = text.trim();
+  if (getrimmt.startsWith("{") || getrimmt.startsWith("[")) {
+    try {
+      const json = JSON.parse(getrimmt);
+      const liste = Array.isArray(json)
+        ? json
+        : json.records || json.results || (json.result && json.result.records) || json.data || null;
+      if (Array.isArray(liste)) {
+        const eintraege = liste.map(tbNormalisiereJsonEintrag).filter(Boolean);
+        return { kopf: [], eintraege, uebersprungen: liste.length - eintraege.length };
+      }
+    } catch (_e) {
+      // Kein valides JSON — unten als CSV weiter parsen.
+    }
+  }
+  const rows = parseCsv(text);
+  const kopf = rows.length > 0 ? rows[0] : [];
+  const idxName = tbFindeSpaltenIndex(kopf, TB_ALIAS_NAME, -1);
+  const idxVn = tbFindeSpaltenIndex(kopf, TB_ALIAS_VORNAME, -1);
+  const idxNn = tbFindeSpaltenIndex(kopf, TB_ALIAS_NACHNAME, -1);
+  const idxStelle = tbFindeSpaltenIndex(kopf, TB_ALIAS_STELLE, -1);
+  const idxTelefon = tbFindeSpaltenIndex(kopf, TB_ALIAS_TELEFON, -1);
+  const hatKopf = idxName >= 0 || idxVn >= 0 || idxNn >= 0 || idxStelle >= 0 || idxTelefon >= 0;
+  const eintraege = [];
+  let uebersprungen = 0;
+  rows.slice(1).forEach((cols) => {
+    const colsArr = Array.isArray(cols) ? cols : [];
+    let name = tbHoleSpalte(colsArr, idxName, 0, hatKopf);
+    if (!name && (idxVn >= 0 || idxNn >= 0)) {
+      name = [tbHoleSpalte(colsArr, idxVn, -1, true), tbHoleSpalte(colsArr, idxNn, -1, true)]
+        .filter(Boolean)
+        .join(" ");
+    }
+    if (name === "") {
+      uebersprungen++;
+      return;
+    }
+    eintraege.push({
+      name,
+      stelle: tbHoleSpalte(colsArr, idxStelle, 1, hatKopf),
+      telefon: tbHoleSpalte(colsArr, idxTelefon, 2, hatKopf),
+    });
+  });
+  return { kopf, eintraege, uebersprungen };
+}
+
+// B3: Anzeige bleibt Rohtext, aber das tel:-Href enthält nur + und Ziffern —
+// Leerzeichen, Slashes & Co. brechen Click-to-Call auf Mobilgeräten.
+function tbNormalisiereTelHref(telefon) {
+  return "tel:" + String(telefon || "").trim().replace(/[^+\d]/g, "");
+}
+
+function tbEscapeRegExp(text) {
+  return String(text).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// ── DOWNLOADS (vCard, CSV-Export) ──────────────────────────────────────────
+function tbLadeDateiHerunter(dateiname, inhalt, mimeTyp) {
+  const blob = new Blob([inhalt], { type: mimeTyp + ";charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = dateiname;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function tbEscapeVcard(text) {
+  return String(text == null ? "" : text).replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/;/g, "\\;").replace(/,/g, "\\,");
+}
+
+function tbBaueVcard(eintrag) {
+  return [
+    "BEGIN:VCARD",
+    "VERSION:3.0",
+    "FN:" + tbEscapeVcard(eintrag.name),
+    "N:" + tbEscapeVcard(eintrag.name) + ";;;;",
+    eintrag.stelle ? "ORG:" + tbEscapeVcard(eintrag.stelle) : null,
+    eintrag.telefon ? "TEL;TYPE=WORK,VOICE:" + tbEscapeVcard(eintrag.telefon) : null,
+    "END:VCARD",
+  ]
+    .filter(Boolean)
+    .join("\r\n");
+}
+
+function tbEscapeCsvFeld(text) {
+  const s = String(text == null ? "" : text);
+  return /[";,\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
 }
 
 const TYP_BEZEICHNUNG = {
@@ -272,7 +501,16 @@ function classifyOdasFehler(error, kontext = {}) {
 
 function renderOdasFehler(container, error, kontext = {}) {
   if (!container) return;
-  const typWarn = validateUrlTypErwartung(kontext.url, kontext.erwarteterTyp);
+  // Mehrere akzeptierte URL-Typen (z. B. CKAN-Download oder statische Datei):
+  // erst warnen, wenn kein einziger passt.
+  const typen = Array.isArray(kontext.erwarteteTypen) && kontext.erwarteteTypen.length
+    ? kontext.erwarteteTypen
+    : [kontext.erwarteterTyp];
+  let typWarn = null;
+  for (const t of typen) {
+    typWarn = validateUrlTypErwartung(kontext.url, t);
+    if (!typWarn) break;
+  }
   if (typWarn && !/Typ passt nicht/i.test(String(error && error.message))) {
     error = new Error(typWarn);
   }
@@ -283,16 +521,6 @@ function renderOdasFehler(container, error, kontext = {}) {
   const alertClass = kontext.leer ? "alert-info" : info.alertClass;
   container.innerHTML = `<div class="alert ${alertClass}" role="alert"><strong>${escapeHtml(titel)}</strong><p class="mb-1">${escapeHtml(info.hinweis)}</p>${urlZeile}<details class="small"><summary>Details</summary><code>${escapeHtml(info.detail || String(error))}</code></details></div>`;
 }
-
-function isLeerErgebnis(json) {
-  if (!json) return true;
-  if (Array.isArray(json) && json.length === 0) return true;
-  if (Array.isArray(json.records) && json.records.length === 0) return true;
-  if (Array.isArray(json.results) && json.results.length === 0) return true;
-  if (json.result && Array.isArray(json.result.records) && json.result.records.length === 0) return true;
-  return false;
-}
-
 
 // ── CSV-PARSING ──────────────────────────────────────────────────────────────
 // Kommunale Open-Data-CSVs sind häufig Semikolon-getrennt, enthalten gequotete
@@ -382,6 +610,16 @@ function renderMethodikbox(configdata, uid) {
 function app(configData, enclosingHtmlDivElement) {
   const tbUid = "i" + ++tbInstanzZaehler;
 
+  // B1: vorherigen Cleanup desselben Containers zuerst laufen lassen — die
+  // Base rendert bei Klick auf die aktive Seite neu, sonst leakt die alte
+  // DataTable-Instanz (Listener auf document/window) bei jedem Re-Render.
+  const vorherigerCleanup = tbCleanups.get(enclosingHtmlDivElement);
+  if (vorherigerCleanup) {
+    try {
+      vorherigerCleanup();
+    } catch (_e) {}
+  }
+
   // Per-Instanz-Laufzeitzustand: wird synchron vor jeglicher DOM- und
   // Async-Arbeit angelegt und je Container in tbCleanups registriert. Alle
   // abzusichernden Ressourcen (hier die DataTable) haengen an diesem Objekt,
@@ -400,13 +638,15 @@ function app(configData, enclosingHtmlDivElement) {
   });
 
   enclosingHtmlDivElement.innerHTML = `<div id="tb-status-${tbUid}"></div>
+      <div id="tb-toolbar-${tbUid}"></div>
       <div class="table-responsive">
       <table id="tb-phonebook-table-${tbUid}" class="tb-phonebook-table table table-striped table-hover">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Stelle</th>
-            <th>Telefonnummer</th>
+            <th scope="col">Name</th>
+            <th scope="col">Stelle</th>
+            <th scope="col">Telefonnummer</th>
+            <th scope="col">Kontakt</th>
           </tr>
         </thead>
         <tbody id="tb-phonebook-body-${tbUid}">
@@ -435,20 +675,23 @@ async function loadCSV(configData, enclosingHtmlDivElement, uid, runtime) {
       url: tbQuelle,
       label: "Telefonbuch-CSV",
       typLabel: "Datei-Download",
-      erwarteterTyp: "ckan-dl",
+      erwarteteTypen: ["ckan-dl", "csv-zip"],
     });
     const emptyTableBody = root.querySelector("#tb-phonebook-body-" + uid);
     if (emptyTableBody) emptyTableBody.innerHTML = "";
     return;
   }
-  // Variante A (F-92): Typprüfung vor dem ersten Fetch.
-  const tbTypWarn = validateUrlTypErwartung(tbQuelle, "ckan-dl");
+  // Variante A (F-92): Typprüfung vor dem ersten Fetch. Neben CKAN-Downloads
+  // sind statische Datei-URLs (CSV/JSON) zulässig — erst warnen, wenn kein
+  // Typmuster passt.
+  const tbCkanWarn = validateUrlTypErwartung(tbQuelle, "ckan-dl");
+  const tbTypWarn = tbCkanWarn && validateUrlTypErwartung(tbQuelle, "csv-zip") ? tbCkanWarn : null;
   if (tbTypWarn) {
     renderOdasFehler(root, new Error(tbTypWarn), {
       url: tbQuelle,
       label: "Telefonbuch-CSV",
       typLabel: "Datei-Download",
-      erwarteterTyp: "ckan-dl",
+      erwarteteTypen: ["ckan-dl", "csv-zip"],
     });
     const emptyTableBody = root.querySelector("#tb-phonebook-body-" + uid);
     if (emptyTableBody) emptyTableBody.innerHTML = "";
@@ -464,43 +707,65 @@ async function loadCSV(configData, enclosingHtmlDivElement, uid, runtime) {
     await ensurePapaparse();
     if (runtime.disposed) return;
 
-    const rows = parseCsv(csvData);
+    // CSV- oder JSON-Quelle auf Eintragsform abbilden; unbrauchbare Zeilen
+    // werden gezählt, nicht stillschweigend verworfen.
+    const daten = tbNormalisiereDatensaetze(csvData);
+    const eintraege = daten.eintraege;
+    const uebersprungen = daten.uebersprungen;
+    const uebernommen = eintraege.length;
+    runtime.eintraege = eintraege;
 
     const tableBody = root.querySelector("#tb-phonebook-body-" + uid);
-    // Kopfzeile überspringen; Zeilen mit zu wenigen Spalten werden gezählt,
-    // nicht stillschweigend verworfen.
-    const datenzeilen = rows.slice(1);
-    let uebersprungen = 0;
-    let uebernommen = 0;
-
-    datenzeilen.forEach((cols) => {
-      const name = (cols[0] || "").trim();
-      if (cols.length < 3 || name === "") {
-        uebersprungen++;
-        return;
-      }
-      uebernommen++;
+    const fragment = document.createDocumentFragment();
+    eintraege.forEach((eintrag, index) => {
       const tr = document.createElement("tr");
 
       const nameCell = document.createElement("td");
-      nameCell.textContent = name;
+      nameCell.textContent = eintrag.name;
       tr.appendChild(nameCell);
 
       const stelleCell = document.createElement("td");
-      stelleCell.textContent = (cols[1] || "").trim();
+      stelleCell.textContent = eintrag.stelle;
       tr.appendChild(stelleCell);
 
-      const telefon = (cols[2] || "").trim();
       const telCell = document.createElement("td");
-      const telLink = document.createElement("a");
-      telLink.href = `tel:${telefon}`;
-      telLink.textContent = telefon;
-      telLink.style.textDecoration = "underline";
-      telCell.appendChild(telLink);
+      if (eintrag.telefon) {
+        const telLink = document.createElement("a");
+        telLink.href = tbNormalisiereTelHref(eintrag.telefon);
+        telLink.textContent = eintrag.telefon;
+        telLink.className = "tb-tel-link";
+        telCell.appendChild(telLink);
+      }
       tr.appendChild(telCell);
 
-      tableBody.appendChild(tr);
+      const vcardCell = document.createElement("td");
+      const vcardBtn = document.createElement("button");
+      vcardBtn.type = "button";
+      vcardBtn.className = "btn btn-sm btn-outline-secondary tb-vcard-btn";
+      vcardBtn.textContent = "vCard";
+      vcardBtn.setAttribute("data-tb-index", String(index));
+      vcardBtn.setAttribute("aria-label", "Kontakt als vCard laden: " + eintrag.name);
+      vcardCell.appendChild(vcardBtn);
+      tr.appendChild(vcardCell);
+
+      fragment.appendChild(tr);
     });
+    if (tableBody) tableBody.appendChild(fragment);
+
+    // Event-Delegation für vCard-Buttons: genau ein Listener am tbody, der
+    // DataTables-Neuzeichnungen (Sortierung, Paginierung) überlebt.
+    if (tableBody) {
+      tableBody.addEventListener("click", (event) => {
+        const btn = event.target && event.target.closest
+          ? event.target.closest(".tb-vcard-btn")
+          : null;
+        if (!btn || runtime.disposed) return;
+        const eintrag = (runtime.eintraege || [])[Number(btn.getAttribute("data-tb-index"))];
+        if (!eintrag) return;
+        const dateiname = eintrag.name.replace(/[^\wäöüÄÖÜß-]+/g, "_").replace(/_+/g, "_") + ".vcf";
+        tbLadeDateiHerunter(dateiname, tbBaueVcard(eintrag), "text/vcard");
+      });
+    }
 
     if (uebernommen === 0) {
       setTelefonbuchStatus(
@@ -521,9 +786,12 @@ async function loadCSV(configData, enclosingHtmlDivElement, uid, runtime) {
       );
     }
 
-    // DataTable initialisieren
+    // DataTable initialisieren (jQuery/DataTables erst jetzt dynamisch laden)
+    if (runtime.disposed) return;
+    await ensureJqueryDataTables();
     if (runtime.disposed) return;
     runtime.dataTable = $(root.querySelector("#tb-phonebook-table-" + uid)).DataTable({
+      columnDefs: [{ orderable: false, searchable: false, targets: 3 }],
       language: {
         decimal: ",",
         thousands: ".",
@@ -546,18 +814,9 @@ async function loadCSV(configData, enclosingHtmlDivElement, uid, runtime) {
         },
       },
       pagingType: "full",
-      drawCallback: function (settings) {
-        if (window.innerWidth <= 576) {
-          // Nur die eigene Instanz umsortieren — kein fremdes DataTables-
-          // Wrapper-Element auf der Seite anfassen (Instanzisolation F-42)
-          const wrapper = $(settings.nTable).closest(".dataTables_wrapper");
-          const lengthMenu = wrapper.find(".dataTables_length");
-          const paginateMenu = wrapper.find(".dataTables_paginate");
-
-          lengthMenu.insertAfter(paginateMenu);
-        }
-      },
     });
+
+    tbBaueToolbar(root, uid, runtime);
 
     const methodikHTML = renderMethodikbox(configData, uid);
     if (methodikHTML) {
@@ -580,10 +839,93 @@ async function loadCSV(configData, enclosingHtmlDivElement, uid, runtime) {
       url: getOdasApiUrl(configData, "telefonbuch"),
       label: "Telefonbuch-CSV",
       typLabel: "Datei-Download",
-      erwarteterTyp: "ckan-dl",
+      erwarteteTypen: ["ckan-dl", "csv-zip"],
     });
     const tableBody = root.querySelector("#tb-phonebook-body-" + uid);
     if (tableBody) tableBody.innerHTML = "";
+  }
+}
+
+// Toolbar: Stellen-Filter (aus den Daten abgeleitet, keine Config),
+// A–Z-Navigation über Namensinitialen, CSV-Export der gefilterten Ansicht.
+// Alle Datenwerte laufen über escapeHtml — nie roh in innerHTML.
+function tbBaueToolbar(root, uid, runtime) {
+  const box = root.querySelector("#tb-toolbar-" + uid);
+  if (!box || !runtime.dataTable || runtime.disposed) return;
+  const eintraege = runtime.eintraege || [];
+  const stellen = [...new Set(eintraege.map((e) => e.stelle).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, "de"));
+  const initialen = new Set();
+  eintraege.forEach((e) => {
+    const ch = String(e.name || "").trim().charAt(0).toUpperCase();
+    if (/[A-ZÄÖÜ]/.test(ch)) initialen.add(ch);
+  });
+  const buchstaben = [...initialen].sort((a, b) => a.localeCompare(b, "de"));
+
+  const stellenOptionen = stellen
+    .map((s) => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`)
+    .join("");
+  const azButtons = buchstaben
+    .map((b) => `<button type="button" class="btn btn-sm btn-outline-secondary tb-az-btn" data-tb-buchstabe="${b}" aria-pressed="false">${b}</button>`)
+    .join("");
+  box.innerHTML =
+    `<div class="tb-toolbar d-flex flex-wrap gap-2 align-items-center mb-3">` +
+    `<select id="tb-stelle-filter-${uid}" class="form-select form-select-sm tb-stelle-filter" aria-label="Nach Stelle filtern">` +
+    `<option value="">Alle Stellen</option>${stellenOptionen}</select>` +
+    `<div class="tb-az btn-group btn-group-sm flex-wrap" role="group" aria-label="Nach Anfangsbuchstabe filtern">` +
+    `<button type="button" class="btn btn-sm btn-primary tb-az-btn" data-tb-buchstabe="" aria-pressed="true">Alle</button>${azButtons}</div>` +
+    `<button id="tb-csv-export-${uid}" type="button" class="btn btn-sm btn-outline-secondary">CSV-Export</button>` +
+    `<button id="tb-reset-${uid}" type="button" class="btn btn-sm btn-outline-secondary">Zurücksetzen</button>` +
+    `</div>`;
+
+  const tabelle = runtime.dataTable;
+  const stelleFilter = box.querySelector("#tb-stelle-filter-" + uid);
+  if (stelleFilter) {
+    stelleFilter.addEventListener("change", () => {
+      if (runtime.disposed) return;
+      const wert = stelleFilter.value;
+      tabelle.column(1).search(wert ? "^" + tbEscapeRegExp(wert) + "$" : "", true, false).draw();
+    });
+  }
+  const setzeAzAktiv = (aktiverBtn) => {
+    box.querySelectorAll(".tb-az-btn").forEach((btn) => {
+      const aktiv = btn === aktiverBtn;
+      btn.classList.toggle("btn-primary", aktiv);
+      btn.classList.toggle("btn-outline-secondary", !aktiv);
+      btn.setAttribute("aria-pressed", aktiv ? "true" : "false");
+    });
+  };
+  box.querySelectorAll(".tb-az-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (runtime.disposed) return;
+      const buchstabe = btn.getAttribute("data-tb-buchstabe") || "";
+      tabelle.column(0).search(buchstabe ? "^" + buchstabe : "", true, false).draw();
+      setzeAzAktiv(btn);
+    });
+  });
+  const resetBtn = box.querySelector("#tb-reset-" + uid);
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => {
+      if (runtime.disposed) return;
+      if (stelleFilter) stelleFilter.value = "";
+      tabelle.column(1).search("", true, false);
+      tabelle.column(0).search("", true, false).draw();
+      setzeAzAktiv(box.querySelector('.tb-az-btn[data-tb-buchstabe=""]'));
+    });
+  }
+  const exportBtn = box.querySelector("#tb-csv-export-" + uid);
+  if (exportBtn) {
+    exportBtn.addEventListener("click", () => {
+      if (runtime.disposed) return;
+      const indexe = tabelle.rows({ search: "applied" }).indexes().toArray();
+      const zeilen = ["Name;Stelle;Telefonnummer"];
+      indexe.forEach((i) => {
+        const e = (runtime.eintraege || [])[i];
+        if (!e) return;
+        zeilen.push([e.name, e.stelle, e.telefon].map(tbEscapeCsvFeld).join(";"));
+      });
+      tbLadeDateiHerunter("telefonbuch-export.csv", "\uFEFF" + zeilen.join("\r\n"), "text/csv");
+    });
   }
 }
 

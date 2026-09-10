@@ -8,7 +8,9 @@ Die App ist eine "ODAP App V1".
 
 ## Funktionen
 
-- Anzeie Kontakte (sortierbar, suchbar, Tel-Direktlinks)
+- Anzeige Kontakte (sortierbar, suchbar, Tel-Direktlinks)
+- Stellen-Filter, A–Z-Navigation, CSV-Export der gefilterten Ansicht, vCard-Download je Eintrag
+- CSV- und JSON-Quellen (CKAN-Download oder statische Datei), Spalten per Kopfzeile zugeordnet
 - Anzeige Header + Burgermenü
 - Datenfrische-Indikator
 - Weiterführende Links (konfigurierbar)

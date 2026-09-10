@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.29.3 - 2026-09-10
+- **FIX:** DataTable-Leak bei Same-Page-Re-Render (B1): vorheriger Container-Cleanup läuft vor `tbCleanups.set` (Unfallatlas-Muster).
+- **FIX:** `tel:`-Href normalisiert (B3, nur `+`/Ziffern) — Click-to-Call auf Mobilgeräten; Rufnummer wird mobil als Anruf-Button dargestellt.
+- **FEATURE:** JSON-Quellen (Array, CKAN-`records`/`results`, `data`) — der Hilfetext versprach JSON bereits (B2); Vor-/Nachname-Felder werden kombiniert.
+- **FEATURE:** Spalten per Kopfzeilennamen (DE/EN-Aliasse) zugeordnet, positional 0/1/2 nur als Fallback; statische Datei-URLs (CSV/JSON) passieren die Typprüfung.
+- **FEATURE:** Stellen-Filter (aus Daten abgeleitet), A–Z-Navigation, CSV-Export der gefilterten Ansicht (Excel-kompatibel mit BOM), vCard-Download je Eintrag.
+- **TECH:** jQuery/DataTables werden dynamisch aus `app/vendor/` geladen — `app/index.html` ist wieder Template-Stand; toter Code (`extractPathFromUrl`, `isLeerErgebnis`) und `drawCallback`-DOM-Jonglage entfernt; Tabellenköpfe mit `scope="col"`.
+
 ## 1.29.2 - 2026-09-08
 - **FIX:** Variante-A-Verdrahtung (F-92): Typprüfung (ckan-dl) vor dem ersten Fetch; Quellen- und Ladefehler über `renderOdasFehler`; Lifecycle-Fixtures typkonform umgestellt (1.29.1 -> 1.29.2).
 
