@@ -294,7 +294,8 @@ function tbHoleSpalte(colsArr, idx, fallbackIdx, hatKopf) {
 function tbNormalisiereDatensaetze(rohtext) {
   const text = String(rohtext == null ? "" : rohtext);
   const getrimmt = text.trim();
-  if (/^\s*<(?:!doctype\s+html|html|head|body)\b/i.test(getrimmt)) {
+  // Jede mit einem Tag beginnende Antwort (auch <!--, <div, <?xml) ist eine Fehlerseite, keine CSV.
+  if (/^<[a-z!?/]/i.test(getrimmt)) {
     throw new Error("Unbekanntes Antwortformat: HTML statt Telefonbuch-CSV/JSON erhalten.");
   }
   if (getrimmt.startsWith("{") || getrimmt.startsWith("[") || /^(?:null|true|false)$/.test(getrimmt)) {

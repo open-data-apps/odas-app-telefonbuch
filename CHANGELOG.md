@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.29.7 - 2026-10-13
+- FIX: F-112 (Nachbesserung): Jede mit einem Tag beginnende Antwort (z. B. <!--, <div, <?xml) wird als Fehlerseite erkannt statt als CSV-Kontakte gelesen.
+
 ## 1.29.6 - 2026-10-08
 - FIX: F-112: Unbekannte Antwortstrukturen als Formatfehler statt als leere Daten anzeigen; bekannte leere Listen bleiben gültig.
 - FIX: F-133: Zurücksetzen entfernt neben Stellen-/Anfangsbuchstabenfilter auch die globale DataTables-Textsuche.
