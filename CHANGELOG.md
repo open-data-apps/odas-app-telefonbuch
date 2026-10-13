@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.29.6 - 2026-10-08
+- FIX: F-112: Unbekannte Antwortstrukturen als Formatfehler statt als leere Daten anzeigen; bekannte leere Listen bleiben gültig.
+- FIX: F-133: Zurücksetzen entfernt neben Stellen-/Anfangsbuchstabenfilter auch die globale DataTables-Textsuche.
+
+## 1.29.5 - 2026-10-02
+- ENH: Verwendete ODAS-Dienste in `odas-services` deklariert.
+
+## 1.29.4 - 2026-09-29
+
+- **FIX:** Audit F-129: Fehlgeschlagene jQuery-/DataTables-/PapaParse-Tags blieben bei Ladefehler stehen und blockierten Wiederholungsversuche. Tags werden bei Fehler entfernt; ein neuer Versuch lädt neu.
+
 ## 1.29.3 - 2026-09-10
 - **FIX:** DataTable-Leak bei Same-Page-Re-Render (B1): vorheriger Container-Cleanup läuft vor `tbCleanups.set` (Unfallatlas-Muster).
 - **FIX:** `tel:`-Href normalisiert (B3, nur `+`/Ziffern) — Click-to-Call auf Mobilgeräten; Rufnummer wird mobil als Anruf-Button dargestellt.

@@ -162,15 +162,20 @@ function describeNonJsonPayload(rawContent) {
 // damit nebenläufige Instanzen denselben Script-Tag mitbenutzen können.
 function ladeVendorSkript(id, src) {
   return new Promise((resolve, reject) => {
-    const fehler = () => reject(new Error("Bibliothek konnte nicht geladen werden: " + src));
     const vorhanden = document.getElementById(id);
+    // F-129: Fehlgeschlagene Tags werden entfernt, damit ein Wiederholungs-
+    // versuch ein neues Tag anlegt statt am toten Tag haengenzubleiben.
+    const fehler = (el) => {
+      if (el && el.parentNode) el.remove();
+      reject(new Error("Bibliothek konnte nicht geladen werden: " + src));
+    };
     if (vorhanden) {
       if (vorhanden.dataset && vorhanden.dataset.fertig === "1") {
         resolve();
         return;
       }
       vorhanden.addEventListener("load", () => resolve());
-      vorhanden.addEventListener("error", fehler);
+      vorhanden.addEventListener("error", () => fehler(vorhanden));
       return;
     }
     const script = document.createElement("script");
@@ -180,7 +185,7 @@ function ladeVendorSkript(id, src) {
       script.dataset.fertig = "1";
       resolve();
     };
-    script.onerror = fehler;
+    script.onerror = () => fehler(script);
     document.head.appendChild(script);
   });
 }
@@ -284,25 +289,25 @@ function tbHoleSpalte(colsArr, idx, fallbackIdx, hatKopf) {
 }
 
 // Liefert { kopf, eintraege }: JSON-Arrays (Objekte) und CSV-Texte werden auf
-// dieselbe Eintragsform { name, stelle, telefon } abgebildet. Ungeparstes
-// fällt auf CSV zurück (nicht umgekehrt), damit kein valider CSV-Text als
-// kaputtes JSON fehlschlägt.
+// dieselbe Eintragsform { name, stelle, telefon } abgebildet. F-112:
+// Erkennbares JSON/HTML wird bei Fehlern nicht als CSV-Kontakt umgedeutet.
 function tbNormalisiereDatensaetze(rohtext) {
   const text = String(rohtext == null ? "" : rohtext);
   const getrimmt = text.trim();
-  if (getrimmt.startsWith("{") || getrimmt.startsWith("[")) {
-    try {
-      const json = JSON.parse(getrimmt);
-      const liste = Array.isArray(json)
-        ? json
-        : json.records || json.results || (json.result && json.result.records) || json.data || null;
-      if (Array.isArray(liste)) {
-        const eintraege = liste.map(tbNormalisiereJsonEintrag).filter(Boolean);
-        return { kopf: [], eintraege, uebersprungen: liste.length - eintraege.length };
-      }
-    } catch (_e) {
-      // Kein valides JSON — unten als CSV weiter parsen.
+  if (/^\s*<(?:!doctype\s+html|html|head|body)\b/i.test(getrimmt)) {
+    throw new Error("Unbekanntes Antwortformat: HTML statt Telefonbuch-CSV/JSON erhalten.");
+  }
+  if (getrimmt.startsWith("{") || getrimmt.startsWith("[") || /^(?:null|true|false)$/.test(getrimmt)) {
+    let json;
+    try { json = JSON.parse(getrimmt); }
+    catch (_e) { throw new Error("Unbekanntes Antwortformat: Telefonbuch-JSON konnte nicht gelesen werden."); }
+    const liste = Array.isArray(json) ? json : json && json.success !== false
+      ? json.records || json.results || (json.result && json.result.records) || json.data : null;
+    if (!Array.isArray(liste)) {
+      throw new Error("Unbekanntes Antwortformat: Kontaktliste im Telefonbuch-JSON erwartet.");
     }
+    const eintraege = liste.map(tbNormalisiereJsonEintrag).filter(Boolean);
+    return { kopf: [], eintraege, uebersprungen: liste.length - eintraege.length };
   }
   const rows = parseCsv(text);
   const kopf = rows.length > 0 ? rows[0] : [];
@@ -538,19 +543,21 @@ function ensurePapaparse() {
       return;
     }
     const vorhanden = document.getElementById("papaparse-script");
+    // F-129: Fehlgeschlagene Tags entfernen (siehe ladeVendorSkript).
+    const fehler = (el) => {
+      if (el && el.parentNode) el.remove();
+      reject(new Error("PapaParse konnte nicht geladen werden."));
+    };
     if (vorhanden) {
       vorhanden.addEventListener("load", () => resolve());
-      vorhanden.addEventListener("error", () =>
-        reject(new Error("PapaParse konnte nicht geladen werden.")),
-      );
+      vorhanden.addEventListener("error", () => fehler(vorhanden));
       return;
     }
     const script = document.createElement("script");
     script.id = "papaparse-script";
     script.src = "vendor/papaparse/papaparse.min.js";
     script.onload = () => resolve();
-    script.onerror = () =>
-      reject(new Error("PapaParse konnte nicht geladen werden."));
+    script.onerror = () => fehler(script);
     document.head.appendChild(script);
   });
 }
@@ -908,6 +915,7 @@ function tbBaueToolbar(root, uid, runtime) {
     resetBtn.addEventListener("click", () => {
       if (runtime.disposed) return;
       if (stelleFilter) stelleFilter.value = "";
+      tabelle.search(""); // F-133: Reset umfasst auch die globale Textsuche.
       tabelle.column(1).search("", true, false);
       tabelle.column(0).search("", true, false).draw();
       setzeAzAktiv(box.querySelector('.tb-az-btn[data-tb-buchstabe=""]'));

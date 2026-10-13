@@ -3,7 +3,7 @@
   "app-entwickler-name": "ondics-gmbh",
   "name-in-url": "telefonbuch",
   "name": "Telefonbuch",
-  "app-version": "1.29.3",
+  "app-version": "1.29.6",
   "app-package-version": "2",
   "odas-app-icon": "assets/odas-app-icon.svg",
   "app-icon": "assets/odas-app-icon.svg",
@@ -62,6 +62,7 @@
   ],
   "branding-css": "",
   "api-version": "1",
+  "odas-services": ["proxy"],
   "instanz-config": {
     "seitentitel": {
       "label": "Seitentitel",
