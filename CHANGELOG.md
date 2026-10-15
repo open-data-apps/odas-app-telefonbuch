@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.29.11 - 2026-10-15
+- FIX: Kopfzeile bei 360 px ohne Überlauf (Template): Logo- und Burger-Spalte passen sich der Breite an, das Menü-Symbol ragt nicht mehr über den rechten Rand. Keine Änderung an App-Code oder Konfiguration.
+
 ## 1.29.10 - 2026-10-15
 - FIX: Sortierpfeile in den Spaltenköpfen werden per CSS dargestellt (keine fehlenden Bilddateien/404 mehr); auf Smartphones (bis 576 px) ist die Spalte „Stelle“ ausgeblendet, sodass die Tabelle ohne Querscrollen passt (Stellenfilter und Suche decken sie weiterhin ab); der letzte A–Z-Button („Z“) wird nicht mehr über die Zeilenbreite gestreckt.
 
