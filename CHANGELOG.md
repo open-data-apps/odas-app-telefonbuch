@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.29.10 - 2026-10-15
+- FIX: Sortierpfeile in den Spaltenköpfen werden per CSS dargestellt (keine fehlenden Bilddateien/404 mehr); auf Smartphones (bis 576 px) ist die Spalte „Stelle“ ausgeblendet, sodass die Tabelle ohne Querscrollen passt (Stellenfilter und Suche decken sie weiterhin ab); der letzte A–Z-Button („Z“) wird nicht mehr über die Zeilenbreite gestreckt.
+
 ## 1.29.9 - 2026-10-15
 - DOCS: Neue Store-Screenshots: je drei Desktop- (1440 × 1000) und Mobile-Aufnahmen (390 × 844) der aktuellen App, aufgenommen auf der Dev-Instanz. Bisherige Bilder nach `docs/screenshots/archive/2026-10-13/` verschoben. Keine Änderung an App-Code oder Konfiguration.
 

@@ -41,3 +41,38 @@
     white-space: nowrap;
   }
 }
+
+/* Sortiersymbole: gebündelte Bilder fehlen (404) – Pfeile per CSS statt Hintergrundbild.
+   Klasse .tb-phonebook-table erhöht die Spezifität, da das Vendor-CSS erst später geladen wird und !important setzt. */
+table.dataTable.tb-phonebook-table thead .sorting,
+table.dataTable.tb-phonebook-table thead .sorting_asc,
+table.dataTable.tb-phonebook-table thead .sorting_desc {
+  background-image: none !important;
+}
+table.dataTable.tb-phonebook-table thead .sorting::after {
+  content: " \2195";
+  opacity: 0.4;
+}
+table.dataTable.tb-phonebook-table thead .sorting_asc::after {
+  content: " \2191";
+}
+table.dataTable.tb-phonebook-table thead .sorting_desc::after {
+  content: " \2193";
+}
+
+/* A–Z-Buttons nicht auf die Zeilenbreite strecken (letzte Zeile, z. B. „Z“) */
+.tb-az > .btn {
+  flex: 0 0 auto;
+}
+
+/* Telefone: Spalte „Stelle“ ausblenden, damit die Tabelle ohne Querscrollen passt.
+   DataTables setzt die Tabellenbreite inline in Pixeln (hier 1 px zu breit) – auf Containerbreite zwingen. */
+@media (max-width: 576px) {
+  .tb-phonebook-table {
+    width: 100% !important;
+  }
+  .tb-phonebook-table th:nth-child(2),
+  .tb-phonebook-table td:nth-child(2) {
+    display: none;
+  }
+}
